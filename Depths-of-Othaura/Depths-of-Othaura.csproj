@@ -31,4 +31,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="SadRogue.Primitives" />
+  </ItemGroup>
+
 </Project>

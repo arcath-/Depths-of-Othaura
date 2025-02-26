@@ -25,11 +25,12 @@ namespace Depths_of_Othaura
             Game.Create(gameStartup);
             Game.Instance.Run();
             Game.Instance.Dispose();
-        }       
+        }
 
         private static void GameStart(object sender, GameHost e)
         {
             ScreenContainer.Instance.World.Generate();
+            ScreenContainer.Instance.World.CreatePlayer();
         }
     }
 }

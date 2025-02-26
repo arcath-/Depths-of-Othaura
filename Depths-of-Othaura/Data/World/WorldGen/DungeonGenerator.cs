@@ -15,12 +15,14 @@ namespace Depths_of_Othaura.Data.World.WorldGen
         // Do you want doors in every room or only a smaller percentage, 60% seems nice
         private const int ChanceForDoorPlacement = 60;
 
-        public static void Generate(Tilemap tilemap, int maxRooms, int minRoomSize, int maxRoomSize, out List<Rectangle> rooms)
+        public static void Generate(Tilemap tilemap, int maxRooms, int minRoomSize, int maxRoomSize, out IReadOnlyList<Rectangle> dungeonRooms)
         {
             tilemap.Reset();
 
             var random = ScreenContainer.Instance.Random;
-            rooms = [];
+            
+            var rooms = new List<Rectangle>();
+            dungeonRooms = rooms;
 
             const int borderSize = 2;
 
