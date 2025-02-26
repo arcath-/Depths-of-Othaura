@@ -6,19 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Depths_of_Othaura.Data.Actors
+namespace Depths_of_Othaura.Data.Entities
 {
     internal abstract class Actor : Entity
     {
+        public ActorStats Stats { get; }
+        public bool IsAlive => Stats.Health > 0;
+
         protected Actor(Color foreground, Color background, int glyph, int zIndex, int maxHealth) : base(foreground, background, glyph, zIndex)
         {
-            MaxHealth = maxHealth;
-            Health = MaxHealth;
+            Stats = new ActorStats(maxHealth);
         }
-
-        public int MaxHealth { get; set; }
-        public int Health { get; set; }
-        public bool IsAlive => Health > 0;
 
         public bool Move(int x, int y)
         {

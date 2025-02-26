@@ -1,4 +1,5 @@
-﻿using Depths_of_Othaura.Data.Actors;
+﻿using Depths_of_Othaura.Data.Entities;
+using Depths_of_Othaura.Data.Entities.Actors;
 using Depths_of_Othaura.Data.World;
 using Depths_of_Othaura.Data.World.WorldGen;
 using SadConsole;
@@ -44,6 +45,38 @@ namespace Depths_of_Othaura.Data.Screens
         {
             Player = new Player(_dungeonRooms[0].Center);
             ActorManager.Add(Player);
+        }
+
+        // Creates NPCs by looping through the generated rooms.
+        public void CreateNpcs()
+        {
+            const int maxNpcPerRoom = 2;
+            foreach (var room in _dungeonRooms)
+            {
+                // Define how many npcs will be in this room
+                var npcs = ScreenContainer.Instance.Random.Next(0, maxNpcPerRoom + 1);
+
+                // All positions within the room except the perimeter positions and the player position
+                var validPositions = room.Positions()
+                    .Except(room.PerimeterPositions().Append(Player.Position))
+                    .ToList();
+
+                for (int i = 0; i < npcs; i++)
+                {
+                    // Select a random position from the list
+                    var randomPosition = validPositions[ScreenContainer.Instance.Random.Next(0, validPositions.Count)];
+
+                    // Create the goblin npc with the given position and add it to the actor manager
+                    var goblin = new Goblin(randomPosition);
+                    ActorManager.Add(goblin);
+
+                    // Make sure we don't spawn another at this position
+                    validPositions.Remove(randomPosition);
+                }
+            }
+
+            // Update the visibility of actors
+            ScreenContainer.Instance.World.ActorManager.UpdateVisibility();
         }
     }
 }

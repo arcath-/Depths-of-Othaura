@@ -6,7 +6,7 @@ using Direction = SadRogue.Primitives.Direction;
 using GoRogue.FOV;
 using GoRogue;
 
-namespace Depths_of_Othaura.Data.Actors
+namespace Depths_of_Othaura.Data.Entities.Actors
 {
     internal class Player : Actor
     {
@@ -27,6 +27,8 @@ namespace Depths_of_Othaura.Data.Actors
 
         public Player(Point position) : base(Color.White, Color.Transparent, '@', zIndex: int.MaxValue, maxHealth: 100)
         {
+            Name = "Rogue";
+
             // Setup FOV map
             var tilemap = ScreenContainer.Instance.World.Tilemap;
             FieldOfView = new RecursiveShadowcastingFOV(new LambdaGridView<bool>(tilemap.Width, tilemap.Height,
@@ -34,6 +36,7 @@ namespace Depths_of_Othaura.Data.Actors
 
             IsFocused = true;
             PositionChanged += Player_PositionChanged;
+            Position = position;
 
             if (!Move(position.X, position.Y))
                 throw new Exception($"Unable to move player to spawn position: {position}");
@@ -96,6 +99,11 @@ namespace Depths_of_Othaura.Data.Actors
         {
             // Calculate the field of view for the player's position
             FieldOfView.Calculate(e.NewValue, FovRadius);
+
+            // Update the visibility of actors
+            ScreenContainer.Instance.World.ActorManager.UpdateVisibility(FieldOfView);
+
+            // Explore the dungeon tiles
             ExploreTilemap();
         }
 

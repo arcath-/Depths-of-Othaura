@@ -1,11 +1,13 @@
-﻿using SadConsole.Entities;
+﻿using Depths_of_Othaura.Data.Screens;
+using GoRogue.FOV;
+using SadConsole.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Depths_of_Othaura.Data.Actors
+namespace Depths_of_Othaura.Data.Entities
 {
     internal sealed class ActorManager
     {
@@ -77,6 +79,16 @@ namespace Depths_of_Othaura.Data.Actors
             }
 
             _actors.Add(e.NewValue, actor);
+        }
+
+        // Renders the NPCs only if they are within FOV.
+        public void UpdateVisibility(IFOV fieldOfView = null)
+        {
+            var fov = fieldOfView ?? ScreenContainer.Instance.World.Player.FieldOfView;
+            foreach (var actor in _actors)
+            {
+                actor.Value.IsVisible = fov.BooleanResultView[actor.Key];
+            }
         }
 
     }
