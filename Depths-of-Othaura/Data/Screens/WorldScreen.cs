@@ -2,8 +2,10 @@
 using Depths_of_Othaura.Data.Entities.Actors;
 using Depths_of_Othaura.Data.World;
 using Depths_of_Othaura.Data.World.WorldGen;
+using GoRogue.Pathing;
 using SadConsole;
 using SadRogue.Primitives;
+using SadRogue.Primitives.GridViews;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +20,7 @@ namespace Depths_of_Othaura.Data.Screens
 
         public readonly Tilemap Tilemap;
         public readonly ActorManager ActorManager;
+        public readonly FastAStar Pathfinder;
 
         public Player Player { get; private set; }
 
@@ -32,6 +35,9 @@ namespace Depths_of_Othaura.Data.Screens
             // Add the entity component to the world screen, so we can track entities
             ActorManager = new ActorManager();
             SadComponents.Add(ActorManager.EntityComponent);
+
+            // Setup the pathfinder
+            Pathfinder = new FastAStar(new LambdaGridView<bool>(Tilemap.Width, Tilemap.Height, (a) => !BlocksMovement(Tilemap[a.X, a.Y].Obstruction)), Distance.Manhattan);
         }
 
         public void Generate()
@@ -77,6 +83,17 @@ namespace Depths_of_Othaura.Data.Screens
 
             // Update the visibility of actors
             ScreenContainer.Instance.World.ActorManager.UpdateVisibility();
+        }
+
+        // Checking for movement blocking - any obstruction that is “MovementBlocked” or
+        // “FullyBlocked” cannot be moved onto, anythign else does not block movement.
+        private static bool BlocksMovement(ObstructionType obstructionType)
+        {
+            return obstructionType switch
+            {
+                ObstructionType.MovementBlocked or ObstructionType.FullyBlocked => true,
+                _ => false,
+            };
         }
     }
 }

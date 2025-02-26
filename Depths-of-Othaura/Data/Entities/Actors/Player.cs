@@ -5,6 +5,7 @@ using SadRogue.Primitives.GridViews;
 using Direction = SadRogue.Primitives.Direction;
 using GoRogue.FOV;
 using GoRogue;
+using Depths_of_Othaura.Data.Logic;
 
 namespace Depths_of_Othaura.Data.Entities.Actors
 {
@@ -38,8 +39,7 @@ namespace Depths_of_Othaura.Data.Entities.Actors
             PositionChanged += Player_PositionChanged;
             Position = position;
 
-            if (!Move(position.X, position.Y))
-                throw new Exception($"Unable to move player to spawn position: {position}");
+            
         }
 
         private readonly Dictionary<Keys, Direction> _playerMovements = new()
@@ -105,6 +105,17 @@ namespace Depths_of_Othaura.Data.Entities.Actors
 
             // Explore the dungeon tiles
             ExploreTilemap();
+        }
+
+        //overriding to call tick logic
+        public override bool Move(int x, int y)
+        {
+            var moved = base.Move(x, y);
+
+            // Execute a game logic tick on movement, even if movement failed
+            GameLogic.Tick(new Point(x, y));
+
+            return moved;
         }
 
     }

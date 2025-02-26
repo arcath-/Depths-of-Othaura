@@ -91,5 +91,10 @@ namespace Depths_of_Othaura.Data.Entities
             }
         }
 
+        public bool Contains(Actor actor)
+        {
+            return _actors.TryGetValue(actor.Position, out var actorAtPos) && actorAtPos.Equals(actor);
+        }
+
     }
 }

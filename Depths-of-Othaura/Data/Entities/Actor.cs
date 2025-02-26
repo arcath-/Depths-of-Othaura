@@ -18,12 +18,12 @@ namespace Depths_of_Othaura.Data.Entities
             Stats = new ActorStats(maxHealth);
         }
 
-        public bool Move(int x, int y)
+        public virtual bool Move(int x, int y)
         {
             var tilemap = ScreenContainer.Instance.World.Tilemap;
             var actorManager = ScreenContainer.Instance.World.ActorManager;
 
-            if (!IsAlive) return false;
+            if (!IsAlive || (Position.X == x && Position.Y == y)) return false;
 
             // If the position is out of bounds, don't allow movement
             if (!tilemap.InBounds(x, y)) return false;
@@ -50,5 +50,23 @@ namespace Depths_of_Othaura.Data.Entities
             var position = Position + direction;
             return Move(position.X, position.Y);
         }
+
+        //Do the thing
+        public void ApplyDamage(int health)
+        {
+            Stats.Health -= health;
+
+            if (!IsAlive && ScreenContainer.Instance.World.ActorManager.Contains(this))
+            {
+                OnDeath();
+            }
+        }
+
+        protected virtual void OnDeath()
+        {
+            // Remove from manager so its no longer rendered
+            ScreenContainer.Instance.World.ActorManager.Remove(this);
+        }
+
     }
 }
