@@ -62,6 +62,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
 
             AddWalls(tilemap);
             AddDoors(tilemap, rooms);
+            InsertStairs(tilemap, rooms);
         }
 
         private static void CarveRoom(Tilemap tilemap, Rectangle room)
@@ -154,5 +155,13 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             }
         }
 
+        private static void InsertStairs(Tilemap tilemap, List<Rectangle> rooms)
+        {
+            // Select a random starting room, excluding the first room (player spawn)
+            var randomRoom = rooms[ScreenContainer.Instance.Random.Next(1, rooms.Count)];
+
+            // Place a stairs down at the room
+            tilemap[randomRoom.Center.ToIndex(tilemap.Width)].Type = TileType.StairsDown;
+        }
     }
 }

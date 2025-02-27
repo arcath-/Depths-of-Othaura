@@ -11,6 +11,7 @@ namespace Depths_of_Othaura.Data.World
         None,
         Floor,
         Wall,
-        Door
+        Door,
+        StairsDown
     }
 }

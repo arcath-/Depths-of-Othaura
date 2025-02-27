@@ -31,8 +31,6 @@ namespace Depths_of_Othaura
         {
             var world = ScreenContainer.Instance.World;
             world.Generate();
-            world.CreatePlayer();
-            world.CreateNpcs();
         }
     }
 }

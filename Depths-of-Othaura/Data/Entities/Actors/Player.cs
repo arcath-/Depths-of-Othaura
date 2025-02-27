@@ -112,8 +112,9 @@ namespace Depths_of_Othaura.Data.Entities.Actors
         {
             var moved = base.Move(x, y);
 
-            // Execute a game logic tick on movement, even if movement failed
-            GameLogic.Tick(new Point(x, y));
+            // Execute a game logic tick on movement, even if movement failed. Only if alive.
+            if (IsAlive) 
+                GameLogic.Tick(new Point(x, y));
 
             return moved;
         }
@@ -125,5 +126,16 @@ namespace Depths_of_Othaura.Data.Entities.Actors
             ScreenContainer.Instance.PlayerStats.UpdatePlayerStats();
         }
 
+        public void ExploreCurrentFov()
+        {
+            // Used when we teleport
+            var tilemap = ScreenContainer.Instance.World.Tilemap;
+            foreach (var point in FieldOfView.CurrentFOV)
+            {
+                tilemap[point.X, point.Y].IsVisible = true;
+                tilemap[point.X, point.Y].InFov = true;
+                ScreenContainer.Instance.World.Surface.IsDirty = true;
+            }
+        }
     }
 }
