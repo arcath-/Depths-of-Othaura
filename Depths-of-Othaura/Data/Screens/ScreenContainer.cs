@@ -1,13 +1,15 @@
 ﻿using SadConsole;
 using SadRogue.Primitives;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Depths_of_Othaura.Data.Screens
 {
+    /// <summary>
+    /// Container for all screen objects used by the roguelike game.
+    /// </summary>
     internal class ScreenContainer : ScreenObject
     {
         private static ScreenContainer _instance;

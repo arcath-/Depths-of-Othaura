@@ -1,9 +1,5 @@
 ﻿using SadRogue.Primitives;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Depths_of_Othaura.Data.World
 {
@@ -32,16 +28,23 @@ namespace Depths_of_Othaura.Data.World
             }
         }
 
-        public bool InBounds(int x, int y)
-        {
-            return x >= 0 && y >= 0 && x < Width && y < Height;
-        }
-
+        /// <summary>
+        /// Indexer for tile at a given (x, y) position.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public Tile this[int x, int y, bool throwExceptionWhenOutOfBounds = true]
         {
             get => this[Point.ToIndex(x, y, Width), throwExceptionWhenOutOfBounds];
         }
 
+        /// <summary>
+        /// Indexer for tile at a given array index position.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public Tile this[int index, bool throwExceptionWhenOutOfBounds = true]
         {
             get
@@ -55,6 +58,17 @@ namespace Depths_of_Othaura.Data.World
                 }
                 return Tiles[index];
             }
+        }
+
+        /// <summary>
+        /// Returns true if the position is within the tilemap.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public bool InBounds(int x, int y)
+        {
+            return x >= 0 && y >= 0 && x < Width && y < Height;
         }
 
         public void Reset()

@@ -1,10 +1,9 @@
 ﻿using Depths_of_Othaura.Data.Entities;
 using Depths_of_Othaura.Data.Screens;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Depths_of_Othaura.Data.Logic
 {

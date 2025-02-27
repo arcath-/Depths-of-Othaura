@@ -1,33 +1,17 @@
 ﻿using Depths_of_Othaura.Data.World.Configuration;
 using SadConsole;
 using SadRogue.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Depths_of_Othaura.Data.World
 {
     internal class Tile : ColoredGlyph
     {
-        private bool _inFov;
-        private TileType _tileType;
-
-
+        
         public int X { get; }
         public int Y { get; }
         public ObstructionType Obstruction { get; set; }
 
-        public Tile(int x, int y)
-        {
-            X = x;
-            Y = y;
-            IsVisible = false;
-            CopyFromConfiguration();
-        }
-
-
+        private TileType _tileType;
         public TileType Type
         {
             get => _tileType;
@@ -42,12 +26,7 @@ namespace Depths_of_Othaura.Data.World
             }
         }
 
-        // Used for tile config initialization
-        internal Tile(TileType type)
-        {
-            _tileType = type;
-        }
-
+        private bool _inFov;
         public bool InFov
         {
             get => _inFov;
@@ -73,12 +52,18 @@ namespace Depths_of_Othaura.Data.World
 
         private Color _seenForeground, _seenBackground, _unseenForeground, _unseenBackground;
 
-        private void SetColorsForFOV()
+        public Tile(int x, int y)
         {
-            _seenForeground = Foreground;
-            _seenBackground = Background;
-            _unseenForeground = Color.Lerp(_seenForeground, Color.Black, 0.5f);
-            _unseenBackground = Color.Lerp(_seenBackground, Color.Black, 0.5f);
+            X = x;
+            Y = y;
+            IsVisible = false;
+            CopyFromConfiguration();
+        }
+
+        // Used for tile config initialization
+        internal Tile(TileType type)
+        {
+            _tileType = type;
         }
 
         private void CopyFromConfiguration()
@@ -92,6 +77,14 @@ namespace Depths_of_Othaura.Data.World
 
             // Set colors for FOV
             SetColorsForFOV();
+        }
+
+        private void SetColorsForFOV()
+        {
+            _seenForeground = Foreground;
+            _seenBackground = Background;
+            _unseenForeground = Color.Lerp(_seenForeground, Color.Black, 0.5f);
+            _unseenBackground = Color.Lerp(_seenBackground, Color.Black, 0.5f);
         }
 
 

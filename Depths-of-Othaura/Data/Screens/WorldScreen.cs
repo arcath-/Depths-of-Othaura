@@ -2,15 +2,15 @@
 using Depths_of_Othaura.Data.Entities.Actors;
 using Depths_of_Othaura.Data.World;
 using Depths_of_Othaura.Data.World.WorldGen;
+
 using GoRogue.Pathing;
 using SadConsole;
 using SadRogue.Primitives;
 using SadRogue.Primitives.GridViews;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Depths_of_Othaura.Data.Screens
 {

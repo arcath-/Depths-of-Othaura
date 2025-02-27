@@ -3,17 +3,19 @@ using Depths_of_Othaura.Data.Screens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Depths_of_Othaura.Data.Entities
 {
     internal sealed class ActorStats
     {
-        public Actor Parent { get; }
-
         public int Level { get; private set; } = 1;
         public int Experience { get; private set; } = 0;
+
+        public int MaxHealth { get; private set; }
+        public int Attack { get; private set; } = 1;
+        public int Defense { get; private set; } = 0;
+        public int DodgeChance { get; private set; } = 0;
+        public int CritChance { get; private set; } = 0;
 
         private int _health = 1;
         public int Health
@@ -22,13 +24,7 @@ namespace Depths_of_Othaura.Data.Entities
             set => _health = Math.Max(0, Math.Min(value, MaxHealth));
         }
 
-        public int MaxHealth { get; private set; }
-        public int Attack { get; private set; } = 1;
-        public int Defense { get; private set; } = 0;
-        public int DodgeChance { get; private set; } = 0;
-        public int CritChance { get; private set; } = 0;
-
-        //constructor
+        public Actor Parent { get; }
         public ActorStats(Actor actor, int maxHealth)
         {
             Parent = actor;

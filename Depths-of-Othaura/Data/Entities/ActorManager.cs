@@ -4,8 +4,6 @@ using SadConsole.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Depths_of_Othaura.Data.Entities
 {
@@ -56,11 +54,26 @@ namespace Depths_of_Othaura.Data.Entities
             return _actors.ContainsKey(point);
         }
 
+        public bool Contains(Actor actor)
+        {
+            return _actors.TryGetValue(actor.Position, out var actorAtPos) && actorAtPos.Equals(actor);
+        }
+
         public void Clear()
         {
             foreach (var actor in _actors.Values)
             {
                 _ = Remove(actor);
+            }
+        }
+
+        // Renders the NPCs only if they are within FOV.
+        public void UpdateVisibility(IFOV fieldOfView = null)
+        {
+            var fov = fieldOfView ?? ScreenContainer.Instance.World.Player.FieldOfView;
+            foreach (var actor in _actors)
+            {
+                actor.Value.IsVisible = fov.BooleanResultView[actor.Key];
             }
         }
 
@@ -81,20 +94,9 @@ namespace Depths_of_Othaura.Data.Entities
             _actors.Add(e.NewValue, actor);
         }
 
-        // Renders the NPCs only if they are within FOV.
-        public void UpdateVisibility(IFOV fieldOfView = null)
-        {
-            var fov = fieldOfView ?? ScreenContainer.Instance.World.Player.FieldOfView;
-            foreach (var actor in _actors)
-            {
-                actor.Value.IsVisible = fov.BooleanResultView[actor.Key];
-            }
-        }
+        
 
-        public bool Contains(Actor actor)
-        {
-            return _actors.TryGetValue(actor.Position, out var actorAtPos) && actorAtPos.Equals(actor);
-        }
+        
 
     }
 }

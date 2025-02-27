@@ -1,10 +1,8 @@
 ﻿using Depths_of_Othaura.Data.Screens;
 using SadRogue.Primitives;
-using System;
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Depths_of_Othaura.Data.World.WorldGen
 {
@@ -12,6 +10,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
     {
         // Sometimes our random position(s) won't work, so we need a few attempts
         private const int MaxAttempts = 100;
+
         // Do you want doors in every room or only a smaller percentage, 60% seems nice
         private const int ChanceForDoorPlacement = 60;
 
@@ -54,15 +53,21 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                 Rectangle roomA = rooms[i - 1];
                 Rectangle roomB = rooms[i];
 
-                Point centerA = new(roomA.X + roomA.Width / 2, roomA.Y + roomA.Height / 2);
-                Point centerB = new(roomB.X + roomB.Width / 2, roomB.Y + roomB.Height / 2);
-
-                CarveTunnel(tilemap, centerA, centerB);
+                CarveTunnel(tilemap, roomA.Center, roomB.Center);
             }
 
             AddWalls(tilemap);
             AddDoors(tilemap, rooms);
             InsertStairs(tilemap, rooms);
+        }
+
+        private static void InsertStairs(Tilemap tilemap, List<Rectangle> rooms)
+        {
+            // Select a random starting room, excluding the first room (player spawn)
+            var randomRoom = rooms[ScreenContainer.Instance.Random.Next(1, rooms.Count)];
+
+            // Place a stairs down at the room
+            tilemap[randomRoom.Center.ToIndex(tilemap.Width)].Type = TileType.StairsDown;
         }
 
         private static void CarveRoom(Tilemap tilemap, Rectangle room)
@@ -71,7 +76,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             {
                 for (int y = room.Y; y < room.Y + room.Height; y++)
                 {
-                    // Set floor tile and make obstruction open
+                    // Set floor tile
                     tilemap[x, y].Type = TileType.Floor;
                 }
             }
@@ -83,14 +88,14 @@ namespace Depths_of_Othaura.Data.World.WorldGen
 
             while (current.X != end.X)
             {
-                // Set floor tile and make obstruction open
+                // Set floor tile
                 tilemap[current.X, current.Y].Type = TileType.Floor;
                 current = new Point(current.X + (current.X < end.X ? 1 : -1), current.Y);
             }
 
             while (current.Y != end.Y)
             {
-                // Set floor tile and make obstruction open
+                // Set floor tile
                 tilemap[current.X, current.Y].Type = TileType.Floor;
                 current = new Point(current.X, current.Y + (current.Y < end.Y ? 1 : -1));
             }
@@ -155,13 +160,6 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             }
         }
 
-        private static void InsertStairs(Tilemap tilemap, List<Rectangle> rooms)
-        {
-            // Select a random starting room, excluding the first room (player spawn)
-            var randomRoom = rooms[ScreenContainer.Instance.Random.Next(1, rooms.Count)];
-
-            // Place a stairs down at the room
-            tilemap[randomRoom.Center.ToIndex(tilemap.Width)].Type = TileType.StairsDown;
-        }
+        
     }
 }

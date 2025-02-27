@@ -1,10 +1,12 @@
 ﻿using Depths_of_Othaura.Data.Screens;
 using SadConsole;
 using SadConsole.Configuration;
-using SadRogue.Primitives;
 
 namespace Depths_of_Othaura
 {
+    /// <summary>
+    /// Process startup
+    /// </summary>
     internal class Program
     {
         private static void Main()

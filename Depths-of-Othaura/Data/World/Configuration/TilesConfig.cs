@@ -1,9 +1,6 @@
 ﻿using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Globalization;
 using SadRogue.Primitives;
 using Newtonsoft.Json;
@@ -21,6 +18,33 @@ namespace Depths_of_Othaura.Data.World.Configuration
         public int Glyph { get; set; }
 
         private static Dictionary<TileType, Tile> _configTiles;
+
+        public static Tile Get(TileType tileType)
+        {
+            if (_configTiles == null) LoadConfiguration();
+            if (!_configTiles.TryGetValue(tileType, out var tile))
+                throw new Exception($"Missing tile configuration for tile type \"{tileType}\".");
+            return tile;
+        }
+
+        private static void LoadConfiguration()
+        {
+            var tilesJson = File.ReadAllText(Constants.TileConfiguration);
+            var tiles = JsonConvert.DeserializeObject<List<TilesConfig>>(tilesJson);
+            _configTiles = tiles.ToDictionary(a => Enum.Parse<TileType>(a.Type, true), ConvertFromConfigurationTile);
+        }
+
+        private static Tile ConvertFromConfigurationTile(TilesConfig tileConfig)
+        {
+            return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
+            {
+                Foreground = HexToColor(tileConfig.Foreground),
+                Background = HexToColor(tileConfig.Background),
+                Glyph = tileConfig.Glyph,
+                Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true)
+            };
+        }
+
         private static Color HexToColor(string hexColor)
         {
             if (string.IsNullOrWhiteSpace(hexColor))
@@ -78,31 +102,11 @@ namespace Depths_of_Othaura.Data.World.Configuration
             }
         }
 
-        private static Tile ConvertFromConfigurationTile(TilesConfig tileConfig)
-        {
-            return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
-            {
-                Foreground = HexToColor(tileConfig.Foreground),
-                Background = HexToColor(tileConfig.Background),
-                Glyph = tileConfig.Glyph,
-                Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true)
-            };
-        }
+        
 
-        private static void LoadConfiguration()
-        {
-            var tilesJson = File.ReadAllText(Constants.TileConfiguration);
-            var tiles = JsonConvert.DeserializeObject<List<TilesConfig>>(tilesJson);
-            _configTiles = tiles.ToDictionary(a => Enum.Parse<TileType>(a.Type, true), ConvertFromConfigurationTile);
-        }
+        
 
-        public static Tile Get(TileType tileType)
-        {
-            if (_configTiles == null) LoadConfiguration();
-            if (!_configTiles.TryGetValue(tileType, out var tile))
-                throw new Exception($"Missing tile configuration for tile type \"{tileType}\".");
-            return tile;
-        }
+        
 
     }
 }

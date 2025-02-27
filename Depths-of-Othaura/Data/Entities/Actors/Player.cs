@@ -1,11 +1,13 @@
 ﻿using Depths_of_Othaura.Data.Screens;
 using Depths_of_Othaura.Data.World;
-using SadConsole.Input;
-using SadRogue.Primitives.GridViews;
-using Direction = SadRogue.Primitives.Direction;
-using GoRogue.FOV;
-using GoRogue;
 using Depths_of_Othaura.Data.Logic;
+
+using SadConsole.Input;
+using SadRogue.Primitives;
+using SadRogue.Primitives.GridViews;
+using GoRogue.FOV;
+
+using System.Collections.Generic;
 
 namespace Depths_of_Othaura.Data.Entities.Actors
 {
@@ -42,37 +44,16 @@ namespace Depths_of_Othaura.Data.Entities.Actors
             
         }
 
-        private readonly Dictionary<Keys, Direction> _playerMovements = new()
+        public void ExploreCurrentFov()
         {
-            {Keys.W, Direction.Up},
-            {Keys.A, Direction.Left},
-            {Keys.S, Direction.Down},
-            {Keys.D, Direction.Right}
-        };
-
-        public override bool ProcessKeyboard(Keyboard keyboard)
-        {
-            if (!UseKeyboard) return false;
-            var moved = false;
-            foreach (var kvp in _playerMovements)
+            // Used when we teleport
+            var tilemap = ScreenContainer.Instance.World.Tilemap;
+            foreach (var point in FieldOfView.CurrentFOV)
             {
-                if (keyboard.IsKeyPressed(kvp.Key))
-                {
-                    var moveDirection = kvp.Value;
-                    moved = Move(moveDirection);
-                    break;
-                }
+                tilemap[point.X, point.Y].IsVisible = true;
+                tilemap[point.X, point.Y].InFov = true;
+                ScreenContainer.Instance.World.Surface.IsDirty = true;
             }
-            return base.ProcessKeyboard(keyboard) || moved;
-        }
-
-        private static bool BlocksFov(ObstructionType obstructionType)
-        {
-            return obstructionType switch
-            {
-                ObstructionType.VisionBlocked or ObstructionType.FullyBlocked => true,
-                _ => false,
-            };
         }
 
         private void ExploreTilemap()
@@ -107,6 +88,39 @@ namespace Depths_of_Othaura.Data.Entities.Actors
             ExploreTilemap();
         }
 
+        private static bool BlocksFov(ObstructionType obstructionType)
+        {
+            return obstructionType switch
+            {
+                ObstructionType.VisionBlocked or ObstructionType.FullyBlocked => true,
+                _ => false,
+            };
+        }
+
+        private readonly Dictionary<Keys, Direction> _playerMovements = new()
+        {
+            {Keys.W, Direction.Up},
+            {Keys.A, Direction.Left},
+            {Keys.S, Direction.Down},
+            {Keys.D, Direction.Right}
+        };
+
+        public override bool ProcessKeyboard(Keyboard keyboard)
+        {
+            if (!UseKeyboard) return false;
+            var moved = false;
+            foreach (var kvp in _playerMovements)
+            {
+                if (keyboard.IsKeyPressed(kvp.Key))
+                {
+                    var moveDirection = kvp.Value;
+                    moved = Move(moveDirection);
+                    break;
+                }
+            }
+            return base.ProcessKeyboard(keyboard) || moved;
+        }
+
         //overriding to call tick logic
         public override bool Move(int x, int y)
         {
@@ -126,16 +140,6 @@ namespace Depths_of_Othaura.Data.Entities.Actors
             ScreenContainer.Instance.PlayerStats.UpdatePlayerStats();
         }
 
-        public void ExploreCurrentFov()
-        {
-            // Used when we teleport
-            var tilemap = ScreenContainer.Instance.World.Tilemap;
-            foreach (var point in FieldOfView.CurrentFOV)
-            {
-                tilemap[point.X, point.Y].IsVisible = true;
-                tilemap[point.X, point.Y].InFov = true;
-                ScreenContainer.Instance.World.Surface.IsDirty = true;
-            }
-        }
+        
     }
 }
