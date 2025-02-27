@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Depths_of_Othaura.Data.Entities.Actors;
+using Depths_of_Othaura.Data.Screens;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +10,8 @@ namespace Depths_of_Othaura.Data.Entities
 {
     internal sealed class ActorStats
     {
+        public Actor Parent { get; }
+
         private int _health = 1;
         public int Health
         {
@@ -21,8 +25,10 @@ namespace Depths_of_Othaura.Data.Entities
         public int DodgeChance { get; private set; } = 0;
         public int CritChance { get; private set; } = 0;
 
-        public ActorStats(int maxHealth)
+        //constructor
+        public ActorStats(Actor actor, int maxHealth)
         {
+            Parent = actor;
             MaxHealth = Math.Max(1, maxHealth);
             Health = MaxHealth;
         }
@@ -33,6 +39,10 @@ namespace Depths_of_Othaura.Data.Entities
             Defense = Math.Max(0, def ?? Defense);
             DodgeChance = Math.Max(0, Math.Min(dodge ?? DodgeChance, 50)); // 50% max dodge chance
             CritChance = Math.Max(0, crit ?? CritChance);
+
+            //update the stats window if parent is player.
+            if (Parent is Player)
+                ScreenContainer.Instance.PlayerStats.UpdatePlayerStats();
         }
     }
 }

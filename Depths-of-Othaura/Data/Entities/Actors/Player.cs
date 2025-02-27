@@ -118,5 +118,12 @@ namespace Depths_of_Othaura.Data.Entities.Actors
             return moved;
         }
 
+        //overridden to update stats screen when losing health.
+        public override void ApplyDamage(int health)
+        {
+            base.ApplyDamage(health);
+            ScreenContainer.Instance.PlayerStats.UpdatePlayerStats();
+        }
+
     }
 }

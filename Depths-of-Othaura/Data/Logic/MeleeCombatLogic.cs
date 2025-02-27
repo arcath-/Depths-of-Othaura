@@ -18,12 +18,12 @@ namespace Depths_of_Othaura.Data.Logic
 
             if (damage > 0)
             {
-                System.Console.WriteLine($"{attacker.Name} has attacked {defender.Name} for {damage}{(isCriticalHit ? "critical" : "")} damage.");
+                MessagesScreen.WriteLine($"{attacker.Name} has attacked {defender.Name} for {damage}{(isCriticalHit ? "critical" : "")} damage.");
                 defender.ApplyDamage(damage);
             }
             else
             {
-                System.Console.WriteLine("The attack was dodged!");
+                MessagesScreen.WriteLine($"{defender.Name} dodged the attack by {attacker.Name}!");
             }
         }
 

@@ -13,9 +13,10 @@ namespace Depths_of_Othaura.Data.Entities
         public ActorStats Stats { get; }
         public bool IsAlive => Stats.Health > 0;
 
+        //constructor
         protected Actor(Color foreground, Color background, int glyph, int zIndex, int maxHealth) : base(foreground, background, glyph, zIndex)
         {
-            Stats = new ActorStats(maxHealth);
+            Stats = new ActorStats(this, maxHealth);
         }
 
         public virtual bool Move(int x, int y)
@@ -52,7 +53,7 @@ namespace Depths_of_Othaura.Data.Entities
         }
 
         //Do the thing
-        public void ApplyDamage(int health)
+        public virtual void ApplyDamage(int health)
         {
             Stats.Health -= health;
 
@@ -66,6 +67,7 @@ namespace Depths_of_Othaura.Data.Entities
         {
             // Remove from manager so its no longer rendered
             ScreenContainer.Instance.World.ActorManager.Remove(this);
+            MessagesScreen.WriteLine($"{Name} has died.");
         }
 
     }

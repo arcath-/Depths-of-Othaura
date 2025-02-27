@@ -51,6 +51,9 @@ namespace Depths_of_Othaura.Data.Screens
         {
             Player = new Player(_dungeonRooms[0].Center);
             ActorManager.Add(Player);
+
+            // Initial player stats draw
+            ScreenContainer.Instance.PlayerStats.UpdatePlayerStats();
         }
 
         // Creates NPCs by looping through the generated rooms.

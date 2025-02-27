@@ -14,8 +14,10 @@ namespace Depths_of_Othaura.Data.Screens
         public static ScreenContainer Instance => _instance ?? throw new Exception("ScreenContainer is not yet initialized.");
 
         public WorldScreen World { get; }
-        public ScreenSurface PlayerStats { get; }
-        public ScreenSurface Messages { get; }
+        public PlayerStatsScreen PlayerStats { get; }
+        public MessagesScreen Messages { get; }
+
+
 
         public Random Random { get; }
 
@@ -27,27 +29,25 @@ namespace Depths_of_Othaura.Data.Screens
 
             Random = new Random();
 
-            // World screen - 70% of width and full height.
-            World = new WorldScreen(Game.Instance.ScreenCellsX.PercentageOf(70), Game.Instance.ScreenCellsY);
+            // World screen - 70% of width and 70% of height.
+            World = new WorldScreen(Game.Instance.ScreenCellsX.PercentageOf(70), Game.Instance.ScreenCellsY.PercentageOf(70));
             Children.Add(World);
 
-            // Player stats screen - 30% width and 60% height
-            PlayerStats = new ScreenSurface(Game.Instance.ScreenCellsX.PercentageOf(30), Game.Instance.ScreenCellsY.PercentageOf(60))
+            // Player stats screen - 30% width and 100% height
+            PlayerStats = new PlayerStatsScreen(Game.Instance.ScreenCellsX.PercentageOf(30), Game.Instance.ScreenCellsY)
             {
                 Position = new Point(World.Position.X + World.Width, World.Position.Y)
             };
             Children.Add(PlayerStats);
 
-            // Messages screen - 30% width and 40% height
-            Messages = new ScreenSurface(Game.Instance.ScreenCellsX.PercentageOf(30), Game.Instance.ScreenCellsY.PercentageOf(40))
+            // Messages screen - 70% width and 30% height
+            Messages = new MessagesScreen(Game.Instance.ScreenCellsX.PercentageOf(70), Game.Instance.ScreenCellsY.PercentageOf(30))
             {
-                Position = new Point(World.Position.X + World.Width, PlayerStats.Position.Y + PlayerStats.Height)
+                Position = new Point(World.Position.X, World.Height)
             };
             Children.Add(Messages);
 
-            // Temporary for visualization of the surfaces
-            PlayerStats.Fill(background: Color.Green);
-            Messages.Fill(background: Color.Yellow);
+
         }
     }
 }
