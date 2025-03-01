@@ -33,10 +33,10 @@ namespace Depths_of_Othaura.Data.World.Configuration
         public string Type { get; set; }
 
         /// <summary>
-        /// The glyph used to represent the tile.
+        /// The ASCII character used to represent the tile.
         /// </summary>
         [JsonConverter(typeof(CharacterConverter))]
-        public int Glyph { get; set; }
+        public int Ascii { get; set; }
 
         /// <summary>
         /// Dictionary storing tile configurations by tile type.
@@ -78,7 +78,7 @@ namespace Depths_of_Othaura.Data.World.Configuration
             {
                 Foreground = HexToColor(tileConfig.Foreground),
                 Background = HexToColor(tileConfig.Background),
-                Glyph = tileConfig.Glyph,
+                Glyph = tileConfig.Ascii,
                 Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true)
             };
         }
