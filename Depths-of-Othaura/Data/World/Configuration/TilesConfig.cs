@@ -7,18 +7,48 @@ using Newtonsoft.Json;
 
 namespace Depths_of_Othaura.Data.World.Configuration
 {
+    /// <summary>
+    /// Handles tile configuration, loading tile properties from a JSON file.
+    /// </summary>
     internal class TilesConfig
     {
+        /// <summary>
+        /// The foreground color of the tile, stored as a hex string.
+        /// </summary>
         public string Foreground { get; set; }
+
+        /// <summary>
+        /// The background color of the tile, stored as a hex string.
+        /// </summary>
         public string Background { get; set; }
+
+        /// <summary>
+        /// The obstruction type of the tile (e.g., walkable, blocked).
+        /// </summary>
         public string Obstruction { get; set; }
+
+        /// <summary>
+        /// The type of the tile (e.g., floor, wall, door).
+        /// </summary>
         public string Type { get; set; }
 
+        /// <summary>
+        /// The glyph used to represent the tile.
+        /// </summary>
         [JsonConverter(typeof(CharacterConverter))]
         public int Glyph { get; set; }
 
+        /// <summary>
+        /// Dictionary storing tile configurations by tile type.
+        /// </summary>
         private static Dictionary<TileType, Tile> _configTiles;
 
+        /// <summary>
+        /// Retrieves the tile configuration for a given tile type.
+        /// </summary>
+        /// <param name="tileType">The type of tile to retrieve.</param>
+        /// <returns>A tile instance configured with the specified tile type.</returns>
+        /// <exception cref="Exception">Thrown if the tile type is not found in the configuration.</exception>
         public static Tile Get(TileType tileType)
         {
             if (_configTiles == null) LoadConfiguration();
@@ -27,6 +57,9 @@ namespace Depths_of_Othaura.Data.World.Configuration
             return tile;
         }
 
+        /// <summary>
+        /// Loads tile configurations from the JSON configuration file.
+        /// </summary>
         private static void LoadConfiguration()
         {
             var tilesJson = File.ReadAllText(Constants.TileConfiguration);
@@ -34,6 +67,11 @@ namespace Depths_of_Othaura.Data.World.Configuration
             _configTiles = tiles.ToDictionary(a => Enum.Parse<TileType>(a.Type, true), ConvertFromConfigurationTile);
         }
 
+        /// <summary>
+        /// Converts a tile configuration entry into a tile instance.
+        /// </summary>
+        /// <param name="tileConfig">The tile configuration data.</param>
+        /// <returns>A new <see cref="Tile"/> instance with the properties from the configuration.</returns>
         private static Tile ConvertFromConfigurationTile(TilesConfig tileConfig)
         {
             return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
@@ -45,6 +83,13 @@ namespace Depths_of_Othaura.Data.World.Configuration
             };
         }
 
+        /// <summary>
+        /// Converts a hexadecimal color string to a <see cref="Color"/> object.
+        /// </summary>
+        /// <param name="hexColor">The hex color string.</param>
+        /// <returns>A <see cref="Color"/> object representing the color.</returns>
+        /// <exception cref="ArgumentException">Thrown if the input string is null or empty.</exception>
+        /// <exception cref="FormatException">Thrown if the hex color format is invalid.</exception>
         private static Color HexToColor(string hexColor)
         {
             if (string.IsNullOrWhiteSpace(hexColor))
@@ -68,13 +113,22 @@ namespace Depths_of_Othaura.Data.World.Configuration
             return new Color(r, g, b, a);
         }
 
+        /// <summary>
+        /// Custom JSON converter for handling character glyphs stored as integers.
+        /// </summary>
         class CharacterConverter : JsonConverter
         {
+            /// <inheritdoc/>
             public override bool CanConvert(Type objectType)
             {
                 return objectType == typeof(int);
             }
 
+            /// <inheritdoc/>
+            /// <summary>
+            /// Reads a JSON value and converts it into an integer glyph.
+            /// </summary>
+            /// <exception cref="JsonSerializationException">Thrown if the JSON value is invalid.</exception>
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
                 if (reader.TokenType == JsonToken.String)
@@ -82,8 +136,7 @@ namespace Depths_of_Othaura.Data.World.Configuration
                     string strValue = (string)reader.Value;
                     if (!string.IsNullOrEmpty(strValue) && strValue.Length == 1)
                     {
-                        // Convert single character string to its ASCII integer value
-                        return (int)strValue[0];
+                        return (int)strValue[0]; // Convert character to ASCII integer value
                     }
                     throw new JsonSerializationException("String must contain exactly one character.");
                 }
@@ -95,18 +148,15 @@ namespace Depths_of_Othaura.Data.World.Configuration
                 throw new JsonSerializationException("Unsupported JSON token for integer or single-character string.");
             }
 
+            /// <inheritdoc/>
+            /// <summary>
+            /// Writes an integer glyph as a JSON value.
+            /// </summary>
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
             {
                 // Serialize the integer as a number
                 writer.WriteValue(value);
             }
         }
-
-        
-
-        
-
-        
-
     }
 }

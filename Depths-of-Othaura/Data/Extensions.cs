@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Depths_of_Othaura.Data
 {
+    /// <summary>
+    /// Provides extension methods for various data types.
+    /// </summary>
     internal static class Extensions
     {
         /// <summary>
@@ -24,25 +27,38 @@ namespace Depths_of_Othaura.Data
         /// <summary>
         /// Gets the neighboring points based on the given point.
         /// </summary>
-        /// <param name="point"></param>
-        /// <param name="includeDiagonals"></param>
-        /// <returns></returns>
+        /// <param name="point">The central point for which neighbors will be retrieved.</param>
+        /// <param name="includeDiagonals">Indicates whether diagonal neighbors should be included.</param>
+        /// <returns>A collection of neighboring points.</returns>
         internal static IEnumerable<Point> GetNeighborPoints(this Point point, bool includeDiagonals)
         {
             return (includeDiagonals ? _diagonalDirections : _directionalDirections).Select(d => new Point(point.X + d.X, point.Y + d.Y));
         }
 
+        /// <summary>
+        /// Array of cardinal direction points (North, South, East, West).
+        /// </summary>
         private static readonly Point[] _directionalDirections =
         [
             new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1)
         ];
 
+        /// <summary>
+        /// Array of diagonal and cardinal direction points.
+        /// </summary>
         private static readonly Point[] _diagonalDirections =
         [
             new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1),
             new Point(-1, -1), new Point(-1, 1), new Point(1, -1), new Point(1, 1)
         ];
 
+        /// <summary>
+        /// Draws a border around the given surface with a title at the top.
+        /// </summary>
+        /// <param name="surface">The surface on which the border and title will be drawn.</param>
+        /// <param name="title">The text to be displayed at the top of the border.</param>
+        /// <param name="borderColor">The color of the border.</param>
+        /// <param name="titleColor">The color of the title text.</param>
         internal static void DrawBorderWithTitle(this ICellSurface surface, string title, Color borderColor, Color titleColor)
         {
             // Draw borders

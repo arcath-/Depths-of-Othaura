@@ -1,6 +1,9 @@
 ﻿
 namespace Depths_of_Othaura.Data.World
 {
+    /// <summary>
+    /// Defines the different types of obstructions in the game world.
+    /// </summary>
     public enum ObstructionType
     {
         /// <summary>

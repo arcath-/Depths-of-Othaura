@@ -1,4 +1,5 @@
-﻿using Depths_of_Othaura.Data.Screens;
+﻿
+using Depths_of_Othaura.Data.Screens;
 using SadRogue.Primitives;
 
 using System.Collections.Generic;
@@ -6,20 +7,33 @@ using System.Linq;
 
 namespace Depths_of_Othaura.Data.World.WorldGen
 {
+    /// <summary>
+    /// Handles the procedural generation of dungeon layouts.
+    /// </summary>
     internal static class DungeonGenerator
     {
-        // Sometimes our random position(s) won't work, so we need a few attempts
+        /// <summary>
+        /// The maximum number of attempts to generate valid rooms before stopping.
+        /// </summary>
         private const int MaxAttempts = 100;
 
-        // Do you want doors in every room or only a smaller percentage, 60% seems nice
+        /// <summary>
+        /// The chance (in percentage) of placing a door in a valid position.
+        /// </summary>
         private const int ChanceForDoorPlacement = 60;
 
+        /// <summary>
+        /// Generates a dungeon layout by creating rooms and tunnels.
+        /// </summary>
+        /// <param name="tilemap">The tilemap to modify.</param>
+        /// <param name="maxRooms">The maximum number of rooms to generate.</param>
+        /// <param name="minRoomSize">The minimum size of each room.</param>
+        /// <param name="maxRoomSize">The maximum size of each room.</param>
+        /// <param name="dungeonRooms">An output list containing the generated rooms.</param>
         public static void Generate(Tilemap tilemap, int maxRooms, int minRoomSize, int maxRoomSize, out IReadOnlyList<Rectangle> dungeonRooms)
         {
             tilemap.Reset();
-
             var random = ScreenContainer.Instance.Random;
-            
             var rooms = new List<Rectangle>();
             dungeonRooms = rooms;
 
@@ -33,7 +47,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                 int width = random.Next(minRoomSize, maxRoomSize);
                 int height = random.Next(minRoomSize, maxRoomSize);
 
-                // Exclude border tiles so we can set walls properly + keep an empty space as the border
+                // Ensure rooms don't touch the edges
                 int x = random.Next(borderSize, tilemap.Width - width - borderSize);
                 int y = random.Next(borderSize, tilemap.Height - height - borderSize);
 
@@ -52,7 +66,6 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             {
                 Rectangle roomA = rooms[i - 1];
                 Rectangle roomB = rooms[i];
-
                 CarveTunnel(tilemap, roomA.Center, roomB.Center);
             }
 
@@ -61,6 +74,11 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             InsertStairs(tilemap, rooms);
         }
 
+        /// <summary>
+        /// Places a staircase leading downward in a randomly selected room.
+        /// </summary>
+        /// <param name="tilemap">The tilemap to modify.</param>
+        /// <param name="rooms">The list of generated dungeon rooms.</param>
         private static void InsertStairs(Tilemap tilemap, List<Rectangle> rooms)
         {
             // Select a random starting room, excluding the first room (player spawn)
@@ -70,6 +88,11 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             tilemap[randomRoom.Center.ToIndex(tilemap.Width)].Type = TileType.StairsDown;
         }
 
+        /// <summary>
+        /// Carves a room into the tilemap by setting its tiles to floor type.
+        /// </summary>
+        /// <param name="tilemap">The tilemap to modify.</param>
+        /// <param name="room">The room to carve.</param>
         private static void CarveRoom(Tilemap tilemap, Rectangle room)
         {
             for (int x = room.X; x < room.X + room.Width; x++)
@@ -82,6 +105,12 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             }
         }
 
+        /// <summary>
+        /// Creates a tunnel connecting two points by setting tiles to floor type.
+        /// </summary>
+        /// <param name="tilemap">The tilemap to modify.</param>
+        /// <param name="start">The starting point of the tunnel.</param>
+        /// <param name="end">The ending point of the tunnel.</param>
         private static void CarveTunnel(Tilemap tilemap, Point start, Point end)
         {
             Point current = start;
@@ -101,6 +130,10 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             }
         }
 
+        /// <summary>
+        /// Adds walls around all floor tiles in the tilemap.
+        /// </summary>
+        /// <param name="tilemap">The tilemap to modify.</param>
         private static void AddWalls(Tilemap tilemap)
         {
             for (int x = 0; x < tilemap.Width; x++)
@@ -126,6 +159,11 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             }
         }
 
+        /// <summary>
+        /// Places doors in valid locations within the dungeon rooms.
+        /// </summary>
+        /// <param name="tilemap">The tilemap to modify.</param>
+        /// <param name="rooms">The list of dungeon rooms.</param>
         private static void AddDoors(Tilemap tilemap, List<Rectangle> rooms)
         {
             foreach (var room in rooms)
@@ -159,7 +197,5 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                 }
             }
         }
-
-        
     }
 }
