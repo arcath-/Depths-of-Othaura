@@ -8,6 +8,9 @@ using SadRogue.Primitives.GridViews;
 using GoRogue.FOV;
 
 using System.Collections.Generic;
+using Depths_of_Othaura.Data.World.Configuration;
+using SadConsole;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Depths_of_Othaura.Data.Entities.Actors
 {
@@ -155,6 +158,21 @@ namespace Depths_of_Othaura.Data.Entities.Actors
                     break;
                 }
             }
+
+            // Press 'T' to toggle between ASCII and Tile mode
+            if (keyboard.IsKeyPressed(Keys.T))
+            {
+                // clear and update the glyphs
+                ScreenContainer.Instance.World.ToggleRenderMode();
+            }
+
+            // Press 'F1' to toggle Debug mode
+            if (keyboard.IsKeyPressed(Keys.F1)) 
+            {
+                ScreenContainer.Instance.World.ToggleDebugMode();
+            }
+
+
             return base.ProcessKeyboard(keyboard) || moved;
         }
 

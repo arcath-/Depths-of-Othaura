@@ -36,7 +36,13 @@ namespace Depths_of_Othaura.Data.World.Configuration
         /// The ASCII character used to represent the tile.
         /// </summary>
         [JsonConverter(typeof(CharacterConverter))]
-        public int Ascii { get; set; }
+        public int AsciiID { get; set; }
+
+        /// <summary>
+        /// The Tile ID used to represent the tile.
+        /// </summary>
+        [JsonConverter(typeof(CharacterConverter))]
+        public int TileID { get; set; }
 
         /// <summary>
         /// Dictionary storing tile configurations by tile type.
@@ -74,13 +80,27 @@ namespace Depths_of_Othaura.Data.World.Configuration
         /// <returns>A new <see cref="Tile"/> instance with the properties from the configuration.</returns>
         private static Tile ConvertFromConfigurationTile(TilesConfig tileConfig)
         {
-            return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
+            if (Constants.UseAsciiMode)
             {
-                Foreground = HexToColor(tileConfig.Foreground),
-                Background = HexToColor(tileConfig.Background),
-                Glyph = tileConfig.Ascii,
-                Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true)
-            };
+                return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
+                {
+                    Foreground = HexToColor(tileConfig.Foreground),
+                    Background = HexToColor(tileConfig.Background),
+                    Glyph = tileConfig.AsciiID,
+                    Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true)
+                };
+            }
+            else
+            {
+                return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
+                {
+                    Foreground = HexToColor(tileConfig.Foreground),
+                    Background = HexToColor(tileConfig.Background),
+                    Glyph = tileConfig.TileID,
+                    Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true)
+                };
+            }
+
         }
 
         /// <summary>

@@ -1,6 +1,8 @@
-﻿using Depths_of_Othaura.Data.World.Configuration;
+﻿using Depths_of_Othaura.Data.Screens;
+using Depths_of_Othaura.Data.World.Configuration;
 using SadConsole;
 using SadRogue.Primitives;
+using System.Runtime.InteropServices;
 
 namespace Depths_of_Othaura.Data.World
 {
@@ -75,6 +77,18 @@ namespace Depths_of_Othaura.Data.World
         private Color _seenForeground, _seenBackground, _unseenForeground, _unseenBackground;
 
         /// <summary>
+        /// The ASCII character ID for this tile.
+        /// This is used when rendering in ASCII mode.
+        /// </summary>
+        public int AsciiID { get; private set; }
+
+        /// <summary>
+        /// The Tile ID for this tile.
+        /// This is used when rendering in Tile mode.
+        /// </summary>
+        public int TileID { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Tile"/> class at a specified position.
         /// </summary>
         /// <param name="x">The X-coordinate of the tile.</param>
@@ -101,6 +115,10 @@ namespace Depths_of_Othaura.Data.World
         /// Copies the tile configuration settings from the configuration data.
         /// Updates the tile's appearance and obstruction settings.
         /// </summary>
+        /// <summary>
+        /// Copies the tile configuration settings from the configuration data.
+        /// Updates the tile's appearance, obstruction settings, and glyph.
+        /// </summary>
         private void CopyFromConfiguration()
         {
             // Copy over the appearance from the configuration tile
@@ -110,9 +128,26 @@ namespace Depths_of_Othaura.Data.World
             // Explicitly set the obstruction type as it's not part of the appearance
             Obstruction = configurationTile.Obstruction;
 
+            // Store AsciiID and TileID for dynamic glyph switching
+            AsciiID = configurationTile.AsciiID; // Should be `AsciiID` from TilesConfig
+            TileID = configurationTile.TileID;  // Should be `TileID` from TilesConfig
+
+            // Update the glyph dynamically based on the current render mode
+            UpdateGlyph();
+
             // Set colors for field of view transitions
             SetColorsForFOV();
         }
+
+        /// <summary>
+        /// Updates the glyph of the tile based on the current rendering mode.
+        /// This allows dynamic switching between ASCII and Tile graphics.
+        /// </summary>
+        public void UpdateGlyph()
+        {
+            Glyph = (char)(Constants.UseAsciiMode ? AsciiID : TileID);
+        }
+
 
         /// <summary>
         /// Sets the colors for the tile when seen and unseen in the field of view.
@@ -124,5 +159,7 @@ namespace Depths_of_Othaura.Data.World
             _unseenForeground = Color.Lerp(_seenForeground, Color.Black, 0.5f);
             _unseenBackground = Color.Lerp(_seenBackground, Color.Black, 0.5f);
         }
+
+        
     }
 }
