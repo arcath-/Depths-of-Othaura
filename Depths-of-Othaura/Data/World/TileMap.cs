@@ -137,19 +137,17 @@ namespace Depths_of_Othaura.Data.World
                     var tile = Tiles[index];
 
                     // Debug log to check previous glyph
-                    System.Console.WriteLine($"Tile[{x}, {y}] before update: {tile.Glyph}");
+                    //System.Console.WriteLine($"Tile[{x}, {y}] before update: {tile.Glyph}");
 
                     // Update glyph dynamically based on the current mode
                     tile.UpdateGlyph();
 
-                    //tile.IsDirty = true;
-
                     // Debug log to verify update
-                    System.Console.WriteLine($"Tile[{x}, {y}] after update: {tile.Glyph}");
+                    //System.Console.WriteLine($"Tile[{x}, {y}] after update: {tile.Glyph}");
                 }
             }
 
-            System.Console.WriteLine("Tile glyphs updated.");
+            //System.Console.WriteLine("Tile glyphs updated.");
         }
     }
 }

@@ -1,12 +1,10 @@
 ﻿using Depths_of_Othaura.Data.Screens;
 using Depths_of_Othaura.Data.World;
 using Depths_of_Othaura.Data.Logic;
-
 using SadConsole.Input;
 using SadRogue.Primitives;
 using SadRogue.Primitives.GridViews;
 using GoRogue.FOV;
-
 using System.Collections.Generic;
 
 namespace Depths_of_Othaura.Data.Entities.Actors
@@ -102,11 +100,20 @@ namespace Depths_of_Othaura.Data.Entities.Actors
         /// <param name="e">The event arguments containing the old and new position.</param>
         private void Player_PositionChanged(object sender, ValueChangedEventArgs<Point> e)
         {
+            IFOV fov;
             // Recalculate the player's field of view
-            FieldOfView.Calculate(e.NewValue, FovRadius);
+            if (!Constants.DebugMode) // Check if DebugMode is OFF
+            {
+                FieldOfView.Calculate(e.NewValue, FovRadius);
+                fov = FieldOfView;
+            }
+            else
+            {
+                fov = ScreenContainer.Instance.FullMapFOV;
+            }
 
-            // Update visibility of all actors based on the new FOV
-            ScreenContainer.Instance.World.ActorManager.UpdateVisibility(FieldOfView);
+            // Update visibility of all actors based on the  FOV
+            ScreenContainer.Instance.World.ActorManager.UpdateVisibility(fov);
 
             // Explore newly visible areas
             ExploreTilemap();
@@ -165,8 +172,11 @@ namespace Depths_of_Othaura.Data.Entities.Actors
 
             // Press 'F1' to toggle debug mode
             if (keyboard.IsKeyPressed(Keys.F1))
-            {                
+            {
+                System.Console.WriteLine($"Debug before toggle: {Constants.DebugMode}");
                 ScreenContainer.Instance.World.ToggleDebugMode();
+                OnDebugModeChanged(ScreenContainer.Instance.World.Tilemap);
+                System.Console.WriteLine($"Debug after toggle: {Constants.DebugMode}");
             }
 
             return base.ProcessKeyboard(keyboard) || moved;
@@ -197,6 +207,59 @@ namespace Depths_of_Othaura.Data.Entities.Actors
         {
             base.ApplyDamage(health);
             ScreenContainer.Instance.PlayerStats.UpdatePlayerStats();
+        }
+
+        /// <summary>
+        /// Updates all tile glyphs based on the current debug state
+        /// </summary>
+        private void OnDebugModeChanged(Tilemap tilemap)
+        {
+            UpdateFOV(tilemap); // Call the UpdateFOV method, which is used to alter the tiles
+            ScreenContainer.Instance.World.Surface.IsDirty = true;
+        }
+
+        private void UpdateFOV(Tilemap tilemap)
+        {
+            if (Constants.DebugMode)
+            {
+                // Disable FOV: Set all tiles to InFov = true and IsVisible = true
+                for (int x = 0; x < tilemap.Width; x++)
+                {
+                    for (int y = 0; y < tilemap.Height; y++)
+                    {
+                        tilemap[x, y].InFov = true;
+                        tilemap[x, y].IsVisible = true;  // Ensure tiles are marked as visible
+                        ScreenContainer.Instance.World.Surface.IsDirty = true; // And surface is dirty
+                    }
+                }
+            }
+            else
+            {
+                // Restore original FOV
+                RestoreFOV(tilemap);
+            }
+        }
+
+        private void RestoreFOV(Tilemap tilemap)
+        {
+            // Calculate fov to clear any non-visibile walls
+
+            for (int x = 0; x < tilemap.Width; x++)
+            {
+                for (int y = 0; y < tilemap.Height; y++)
+                {
+                    FieldOfView.Calculate(Position, FovRadius);
+
+                    ExploreTilemap();
+
+                    if (!FieldOfView.BooleanResultView[x, y])
+                    {
+                        tilemap[x, y].InFov = false;
+                        tilemap[x, y].IsVisible = false;
+                        ScreenContainer.Instance.World.Surface.IsDirty = true;
+                    }
+                }
+            }
         }
     }
 }

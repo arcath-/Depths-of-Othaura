@@ -1,4 +1,5 @@
-﻿using Depths_of_Othaura.Data.World.Configuration;
+﻿using Depths_of_Othaura.Data.Screens;
+using Depths_of_Othaura.Data.World.Configuration;
 using SadConsole;
 using SadRogue.Primitives;
 
@@ -78,6 +79,9 @@ namespace Depths_of_Othaura.Data.World
                         Foreground = _unseenForeground;
                         Background = _unseenBackground;
                     }
+
+                    // Force screen redraw
+                    ScreenContainer.Instance.World.Surface.IsDirty = true;
                 }
             }
         }
@@ -125,7 +129,7 @@ namespace Depths_of_Othaura.Data.World
             TileID = configurationTile.TileID;
 
             // Debug log to check assigned IDs
-            System.Console.WriteLine($"Tile[{X}, {Y}] Config Loaded - AsciiID: {AsciiID}, TileID: {TileID}");
+            //System.Console.WriteLine($"Tile[{X}, {Y}] Config Loaded - AsciiID: {AsciiID}, TileID: {TileID}");
 
             // Set colors for field of view transitions
             SetColorsForFOV();

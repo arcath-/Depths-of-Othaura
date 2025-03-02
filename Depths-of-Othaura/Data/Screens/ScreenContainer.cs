@@ -1,6 +1,8 @@
 ﻿using SadConsole;
 using SadRogue.Primitives;
 using System;
+using GoRogue.FOV;
+using SadRogue.Primitives.GridViews;
 
 namespace Depths_of_Othaura.Data.Screens
 {
@@ -39,6 +41,11 @@ namespace Depths_of_Othaura.Data.Screens
         public Random Random { get; }
 
         /// <summary>
+        /// Represents a full map.
+        /// </summary>
+        public IFOV FullMapFOV { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ScreenContainer"/> class.
         /// Ensures only one instance of the container exists.
         /// </summary>
@@ -54,6 +61,10 @@ namespace Depths_of_Othaura.Data.Screens
             // World screen - 70% of width and 70% of height.
             World = new WorldScreen(Game.Instance.ScreenCellsX.PercentageOf(70), Game.Instance.ScreenCellsY.PercentageOf(70));
             Children.Add(World);
+
+            //FullMap Visibility
+            FullMapFOV = new RecursiveShadowcastingFOV(new LambdaGridView<bool>(World.Tilemap.Width, World.Tilemap.Height, (point) => true));
+            FullMapFOV.Calculate(new Point(0, 0), Math.Max(World.Tilemap.Width, World.Tilemap.Height)); // Calculate from arbitrary point with very large radius to make sure it will be complete.
 
             // Player stats screen - 30% width and 100% height.
             PlayerStats = new PlayerStatsScreen(Game.Instance.ScreenCellsX.PercentageOf(30), Game.Instance.ScreenCellsY)
