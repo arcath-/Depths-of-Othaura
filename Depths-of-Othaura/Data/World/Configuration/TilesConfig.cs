@@ -59,9 +59,15 @@ namespace Depths_of_Othaura.Data.World.Configuration
         {
             if (_configTiles == null) LoadConfiguration();
             if (!_configTiles.TryGetValue(tileType, out var tile))
+            {
+                System.Console.WriteLine($"TilesConfig: Missing config for tile type {tileType}");
                 throw new Exception($"Missing tile configuration for tile type \"{tileType}\".");
+            }
+
+            System.Console.WriteLine($"TilesConfig: Loaded {tileType} -> AsciiID: {tile.AsciiID}, TileID: {tile.TileID}");
             return tile;
         }
+
 
         /// <summary>
         /// Loads tile configurations from the JSON configuration file.
