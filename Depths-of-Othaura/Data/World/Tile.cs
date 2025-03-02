@@ -24,6 +24,16 @@ namespace Depths_of_Othaura.Data.World
         /// </summary>
         public ObstructionType Obstruction { get; set; }
 
+        /// <summary>
+        /// The Ascii ID of the Glyph
+        /// </summary>
+        public int AsciiID { get; set; }
+
+        /// <summary>
+        /// The Tiles ID of the Glyph
+        /// </summary>
+        public int TileID { get; set; }
+
         private TileType _tileType;
 
         /// <summary>
@@ -110,8 +120,24 @@ namespace Depths_of_Othaura.Data.World
             // Explicitly set the obstruction type as it's not part of the appearance
             Obstruction = configurationTile.Obstruction;
 
+            // Store AsciiID and TileID for dynamic glyph switching
+            AsciiID = configurationTile.AsciiID;
+            TileID = configurationTile.TileID;
+
+            // Debug log to check assigned IDs
+            System.Console.WriteLine($"Tile[{X}, {Y}] Config Loaded - AsciiID: {AsciiID}, TileID: {TileID}");
+
             // Set colors for field of view transitions
             SetColorsForFOV();
+        }
+
+        /// <summary>
+        /// Updates the glyph of the tile based on the current rendering mode.
+        /// This allows dynamic switching between ASCII and Tile graphics.
+        /// </summary>
+        public void UpdateGlyph()
+        {
+            Glyph = (char)(Constants.AsciiRenderMode ? AsciiID : TileID);
         }
 
         /// <summary>

@@ -19,6 +19,16 @@ namespace Depths_of_Othaura.Data.World
         public readonly int Height;
 
         /// <summary>
+        /// The Ascii ID of the Glyph
+        /// </summary>
+        public int AsciiID { get; set; }
+
+        /// <summary>
+        /// The Tiles ID of the Glyph
+        /// </summary>
+        public int TileID { get; set; }
+
+        /// <summary>
         /// The collection of tiles that make up the tilemap.
         /// </summary>
         public readonly Tile[] Tiles;
@@ -109,6 +119,37 @@ namespace Depths_of_Othaura.Data.World
                     Tiles[index].Clear();
                 }
             }
+        }
+
+        /// <summary>
+        /// Updates all tile glyphs based on the current rendering mode.
+        /// </summary>
+        public void UpdateGlyph()
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    //update logic
+                    int index = Point.ToIndex(x, y, Width);
+
+                    // Ensure we reference the correct tile object
+                    var tile = Tiles[index];
+
+                    // Debug log to check previous glyph
+                    System.Console.WriteLine($"Tile[{x}, {y}] before update: {tile.Glyph}");
+
+                    // Update glyph dynamically based on the current mode
+                    tile.UpdateGlyph();
+
+                    //tile.IsDirty = true;
+
+                    // Debug log to verify update
+                    System.Console.WriteLine($"Tile[{x}, {y}] after update: {tile.Glyph}");
+                }
+            }
+
+            System.Console.WriteLine("Tile glyphs updated.");
         }
     }
 }

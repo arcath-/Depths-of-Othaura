@@ -25,5 +25,15 @@
         /// Default radius for the player's field of view.
         /// </summary>
         public const int PlayerFieldOfViewRadius = 6;
+
+        /// <summary>
+        /// Toggle for Ascii/Tiles toggle. Default set to true.
+        /// </summary>
+        public static bool AsciiRenderMode = true;
+
+        /// <summary>
+        /// Toggle for Debug toggle. Default set to false.
+        /// </summary>
+        public static bool DebugMode = false;
     }
 }

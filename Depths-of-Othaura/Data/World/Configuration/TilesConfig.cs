@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using SadRogue.Primitives;
 using Newtonsoft.Json;
+using static Microsoft.Xna.Framework.Graphics.SpriteFont;
+using System.Diagnostics;
+using Depths_of_Othaura.Data.Screens;
 
 namespace Depths_of_Othaura.Data.World.Configuration
 {
@@ -33,10 +36,16 @@ namespace Depths_of_Othaura.Data.World.Configuration
         public string Type { get; set; }
 
         /// <summary>
-        /// The ASCII character used to represent the tile.
+        /// The ASCII ID used to represent the tile.
         /// </summary>
-        [JsonConverter(typeof(CharacterConverter))]
-        public int Ascii { get; set; }
+        //[JsonConverter(typeof(CharacterConverter))]
+        public int AsciiID { get; set; }
+
+        /// <summary>
+        /// The Tiles ID used to represent the tile.
+        /// </summary>
+        //[JsonConverter(typeof(CharacterConverter))]
+        public int TileID { get; set; }
 
         /// <summary>
         /// Dictionary storing tile configurations by tile type.
@@ -64,6 +73,18 @@ namespace Depths_of_Othaura.Data.World.Configuration
         {
             var tilesJson = File.ReadAllText(Constants.TileConfiguration);
             var tiles = JsonConvert.DeserializeObject<List<TilesConfig>>(tilesJson);
+
+            // Debug: Check if any tiles were loaded
+            if (tiles == null || tiles.Count == 0)
+            {
+                //System.Console.WriteLine("ERROR: No tiles loaded from TileConfiguration file!");
+                throw new InvalidOperationException("Tile configuration file is empty or invalid.");
+            }
+            else
+            {
+                //System.Console.WriteLine($"Successfully loaded {tiles.Count} tiles from TileConfiguration.");
+            }
+
             _configTiles = tiles.ToDictionary(a => Enum.Parse<TileType>(a.Type, true), ConvertFromConfigurationTile);
         }
 
@@ -78,8 +99,10 @@ namespace Depths_of_Othaura.Data.World.Configuration
             {
                 Foreground = HexToColor(tileConfig.Foreground),
                 Background = HexToColor(tileConfig.Background),
-                Glyph = tileConfig.Ascii,
-                Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true)
+                Glyph = (char)(Constants.AsciiRenderMode ? tileConfig.AsciiID : tileConfig.TileID),
+                Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true),
+                AsciiID = tileConfig.AsciiID,
+                TileID = tileConfig.TileID
             };
         }
 

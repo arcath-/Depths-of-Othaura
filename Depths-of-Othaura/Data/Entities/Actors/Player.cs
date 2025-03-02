@@ -155,6 +155,20 @@ namespace Depths_of_Othaura.Data.Entities.Actors
                     break;
                 }
             }
+
+            // Press 'T' to toggle between ASCII and Tile mode
+            if (keyboard.IsKeyPressed(Keys.T))
+            {
+                // clear and update the glyphs
+                ScreenContainer.Instance.World.ToggleRenderMode();
+            }
+
+            // Press 'F1' to toggle debug mode
+            if (keyboard.IsKeyPressed(Keys.F1))
+            {                
+                ScreenContainer.Instance.World.ToggleDebugMode();
+            }
+
             return base.ProcessKeyboard(keyboard) || moved;
         }
 

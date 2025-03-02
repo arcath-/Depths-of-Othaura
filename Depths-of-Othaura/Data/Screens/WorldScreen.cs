@@ -171,5 +171,33 @@ namespace Depths_of_Othaura.Data.Screens
                 _ => false,
             };
         }
+
+        /// <summary>
+        /// Toggles between ASCII mode and Tile mode and updates the map accordingly.
+        /// </summary>
+        public void ToggleRenderMode()
+        {
+            // Flip the mode
+            Constants.AsciiRenderMode = !Constants.AsciiRenderMode;
+            MessagesScreen.WriteLine($"Tile mode toggled: {(Constants.AsciiRenderMode ? "ASCII Mode" : "Tile Mode")}");
+
+            Tilemap.UpdateGlyph();  // <-- This should update all glyphs
+
+            // Force the screen to refresh to reflect changes
+            Surface.IsDirty = true;
+        }
+
+
+        /// <summary>
+        /// Toggles Debug mode.
+        /// </summary>
+        public void ToggleDebugMode()
+        {
+            
+            Constants.DebugMode = !Constants.DebugMode;
+            MessagesScreen.WriteLine($"Debug mode toggled: {(Constants.DebugMode ? "On" : "Off")}");
+
+            //Turn of FOV
+        }
     }
 }
