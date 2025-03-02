@@ -36,13 +36,7 @@ namespace Depths_of_Othaura.Data.World.Configuration
         /// The ASCII character used to represent the tile.
         /// </summary>
         [JsonConverter(typeof(CharacterConverter))]
-        public int AsciiID { get; set; }
-
-        /// <summary>
-        /// The Tile ID used to represent the tile.
-        /// </summary>
-        [JsonConverter(typeof(CharacterConverter))]
-        public int TileID { get; set; }
+        public int Ascii { get; set; }
 
         /// <summary>
         /// Dictionary storing tile configurations by tile type.
@@ -59,15 +53,9 @@ namespace Depths_of_Othaura.Data.World.Configuration
         {
             if (_configTiles == null) LoadConfiguration();
             if (!_configTiles.TryGetValue(tileType, out var tile))
-            {
-                System.Console.WriteLine($"TilesConfig: Missing config for tile type {tileType}");
                 throw new Exception($"Missing tile configuration for tile type \"{tileType}\".");
-            }
-
-            System.Console.WriteLine($"TilesConfig: Loaded {tileType} -> AsciiID: {tile.AsciiID}, TileID: {tile.TileID}");
             return tile;
         }
-
 
         /// <summary>
         /// Loads tile configurations from the JSON configuration file.
@@ -86,27 +74,13 @@ namespace Depths_of_Othaura.Data.World.Configuration
         /// <returns>A new <see cref="Tile"/> instance with the properties from the configuration.</returns>
         private static Tile ConvertFromConfigurationTile(TilesConfig tileConfig)
         {
-            if (Constants.UseAsciiMode)
+            return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
             {
-                return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
-                {
-                    Foreground = HexToColor(tileConfig.Foreground),
-                    Background = HexToColor(tileConfig.Background),
-                    Glyph = tileConfig.AsciiID,
-                    Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true)
-                };
-            }
-            else
-            {
-                return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
-                {
-                    Foreground = HexToColor(tileConfig.Foreground),
-                    Background = HexToColor(tileConfig.Background),
-                    Glyph = tileConfig.TileID,
-                    Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true)
-                };
-            }
-
+                Foreground = HexToColor(tileConfig.Foreground),
+                Background = HexToColor(tileConfig.Background),
+                Glyph = tileConfig.Ascii,
+                Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true)
+            };
         }
 
         /// <summary>

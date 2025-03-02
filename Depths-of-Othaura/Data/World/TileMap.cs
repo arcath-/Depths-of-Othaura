@@ -1,9 +1,5 @@
-﻿using Depths_of_Othaura.Data.World.Configuration;
-using static Depths_of_Othaura.Data.World.Configuration.TilesConfig;
-using SadRogue.Primitives;
+﻿using SadRogue.Primitives;
 using System;
-using static Microsoft.Xna.Framework.Graphics.SpriteFont;
-using static SadConsole.Readers.Playscii;
 
 namespace Depths_of_Othaura.Data.World
 {
@@ -114,41 +110,5 @@ namespace Depths_of_Othaura.Data.World
                 }
             }
         }
-
-        /// <summary>
-        /// Updates all tile glyphs based on the current rendering mode.
-        /// </summary>
-        /// <summary>
-        /// Updates all tile glyphs based on the current rendering mode.
-        /// </summary>
-        /// <summary>
-        /// Updates all tile glyphs based on the current rendering mode.
-        /// </summary>
-        public void UpdateGlyph()
-        {
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    int index = Point.ToIndex(x, y, Width);
-                    var tile = Tiles[index];
-
-                    // Debug log to check previous glyph
-                    System.Console.WriteLine($"Tile[{x}, {y}] before update: {tile.Glyph}");
-
-                    // Update glyph dynamically based on the current mode
-                    tile.UpdateGlyph();
-
-                    // Debug log to verify update
-                    System.Console.WriteLine($"Tile[{x}, {y}] after update: {tile.Glyph}");
-                }
-            }
-
-            System.Console.WriteLine("Tile glyphs updated.");
-        }
-
-
-
-
     }
 }

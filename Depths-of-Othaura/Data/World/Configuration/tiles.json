@@ -4,39 +4,39 @@
     "Obstruction": "FullyBlocked",
     "Foreground": "#00000000",
     "Background": "#00000000",
-    "AsciiID": 0,
-    "TileID":  0
+    "Ascii": 0,
+    "Tile":  0
   },
   {
     "Type": "Floor",
     "Obstruction": "Open",
     "Foreground": "#808080",
     "Background": "#00000000",
-    "AsciiID": 46,
-    "TileID": 273
+    "Ascii": 46,
+    "Tile": 273
   },
   {
     "Type": "Wall",
     "Obstruction": "FullyBlocked",
     "Foreground": "#f4a460",
     "Background": "#00000000",
-    "AsciiID": 35,
-    "TileID": 257
+    "Ascii": 35,
+    "Tile": 257
   },
   {
     "Type": "Door",
     "Obstruction": "VisionBlocked",
     "Foreground": "#ff4500",
     "Background": "#00000000",
-    "AsciiID": 43,
-    "TileID": 271
+    "Ascii": 43,
+    "Tile": 271
   },
   {
     "Type": "StairsDown",
     "Obstruction": "VisionBlocked",
     "Foreground": "#828282",
     "Background": "#00000000",
-    "AsciiID": 31,
-    "TileID": 302
+    "Ascii": 31,
+    "Tile": 302
   }
 ]

@@ -25,17 +25,5 @@
         /// Default radius for the player's field of view.
         /// </summary>
         public const int PlayerFieldOfViewRadius = 6;
-
-        /// <summary>
-        /// Determines whether the game is in normal or debug mode.
-        /// Default is false (Debug Off).
-        /// </summary>
-        public static bool UseDebugMode = false;
-
-        /// <summary>
-        /// Determines whether the game uses ASCII mode or Tile mode.
-        /// Default is true (ASCII mode).
-        /// </summary>
-        public static bool UseAsciiMode = true;
     }
 }
