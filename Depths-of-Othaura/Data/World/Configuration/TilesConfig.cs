@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using SadRogue.Primitives;
 using Newtonsoft.Json;
-using static Microsoft.Xna.Framework.Graphics.SpriteFont;
-using System.Diagnostics;
-using Depths_of_Othaura.Data.Screens;
+
 
 namespace Depths_of_Othaura.Data.World.Configuration
 {
@@ -38,14 +36,17 @@ namespace Depths_of_Othaura.Data.World.Configuration
         /// <summary>
         /// The ASCII ID used to represent the tile.
         /// </summary>
-        //[JsonConverter(typeof(CharacterConverter))]
         public int AsciiID { get; set; }
 
         /// <summary>
         /// The Tiles ID used to represent the tile.
         /// </summary>
-        //[JsonConverter(typeof(CharacterConverter))]
         public int TileID { get; set; }
+
+        /// <summary>
+        /// The glyph used to represent the tile.
+        /// </summary>
+        public int Glyph { get; set; }
 
         /// <summary>
         /// Dictionary storing tile configurations by tile type.
@@ -53,66 +54,12 @@ namespace Depths_of_Othaura.Data.World.Configuration
         private static Dictionary<TileType, Tile> _configTiles;
 
         /// <summary>
-        /// Retrieves the tile configuration for a given tile type.
+        /// Converts a hex color string to a <see cref="Color"/> object.
         /// </summary>
-        /// <param name="tileType">The type of tile to retrieve.</param>
-        /// <returns>A tile instance configured with the specified tile type.</returns>
-        /// <exception cref="Exception">Thrown if the tile type is not found in the configuration.</exception>
-        public static Tile Get(TileType tileType)
-        {
-            if (_configTiles == null) LoadConfiguration();
-            if (!_configTiles.TryGetValue(tileType, out var tile))
-                throw new Exception($"Missing tile configuration for tile type \"{tileType}\".");
-            return tile;
-        }
-
-        /// <summary>
-        /// Loads tile configurations from the JSON configuration file.
-        /// </summary>
-        private static void LoadConfiguration()
-        {
-            var tilesJson = File.ReadAllText(Constants.TileConfiguration);
-            var tiles = JsonConvert.DeserializeObject<List<TilesConfig>>(tilesJson);
-
-            // Debug: Check if any tiles were loaded
-            if (tiles == null || tiles.Count == 0)
-            {
-                //System.Console.WriteLine("ERROR: No tiles loaded from TileConfiguration file!");
-                throw new InvalidOperationException("Tile configuration file is empty or invalid.");
-            }
-            else
-            {
-                //System.Console.WriteLine($"Successfully loaded {tiles.Count} tiles from TileConfiguration.");
-            }
-
-            _configTiles = tiles.ToDictionary(a => Enum.Parse<TileType>(a.Type, true), ConvertFromConfigurationTile);
-        }
-
-        /// <summary>
-        /// Converts a tile configuration entry into a tile instance.
-        /// </summary>
-        /// <param name="tileConfig">The tile configuration data.</param>
-        /// <returns>A new <see cref="Tile"/> instance with the properties from the configuration.</returns>
-        private static Tile ConvertFromConfigurationTile(TilesConfig tileConfig)
-        {
-            return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
-            {
-                Foreground = HexToColor(tileConfig.Foreground),
-                Background = HexToColor(tileConfig.Background),
-                Glyph = (char)(Constants.AsciiRenderMode ? tileConfig.AsciiID : tileConfig.TileID),
-                Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true),
-                AsciiID = tileConfig.AsciiID,
-                TileID = tileConfig.TileID
-            };
-        }
-
-        /// <summary>
-        /// Converts a hexadecimal color string to a <see cref="Color"/> object.
-        /// </summary>
-        /// <param name="hexColor">The hex color string.</param>
-        /// <returns>A <see cref="Color"/> object representing the color.</returns>
-        /// <exception cref="ArgumentException">Thrown if the input string is null or empty.</exception>
-        /// <exception cref="FormatException">Thrown if the hex color format is invalid.</exception>
+        /// <param name="hexColor">The hex color string (e.g., "#RRGGBB" or "#RRGGBBAA").</param>
+        /// <returns>The corresponding <see cref="Color"/> object.</returns>
+        /// <exception cref="ArgumentException">Thrown if the hex color string is null or empty.</exception>
+        /// <exception cref="FormatException">Thrown if the hex color string is not in the correct format.</exception>
         private static Color HexToColor(string hexColor)
         {
             if (string.IsNullOrWhiteSpace(hexColor))
@@ -137,21 +84,71 @@ namespace Depths_of_Othaura.Data.World.Configuration
         }
 
         /// <summary>
-        /// Custom JSON converter for handling character glyphs stored as integers.
+        /// Converts a <see cref="TilesConfig"/> object to a <see cref="Tile"/> object.
+        /// </summary>
+        /// <param name="tileConfig">The <see cref="TilesConfig"/> object to convert.</param>
+        /// <returns>The corresponding <see cref="Tile"/> object.</returns>
+        private static Tile ConvertFromConfigurationTile(TilesConfig tileConfig)
+        {
+            return new Tile(Enum.Parse<TileType>(tileConfig.Type, true))
+            {
+                Foreground = HexToColor(tileConfig.Foreground),
+                Background = HexToColor(tileConfig.Background),
+                Glyph = (Constants.AsciiRenderMode ? tileConfig.AsciiID : tileConfig.TileID),
+                Obstruction = Enum.Parse<ObstructionType>(tileConfig.Obstruction, true),
+                AsciiID = tileConfig.AsciiID,
+                TileID = tileConfig.TileID
+            };
+        }
+
+        /// <summary>
+        /// Loads the tile configuration from the JSON file specified in <see cref="Constants.TileConfiguration"/>.
+        /// </summary>
+        private static void LoadConfiguration()
+        {
+            var tilesJson = File.ReadAllText(Constants.TileConfiguration);
+            var tiles = JsonConvert.DeserializeObject<List<TilesConfig>>(tilesJson);
+
+            // Debug: Check if any tiles were loaded
+            if (tiles == null || tiles.Count == 0)
+            {
+                //System.Console.WriteLine("ERROR: No tiles loaded from TileConfiguration file!");
+                throw new InvalidOperationException("Tile configuration file is empty or invalid.");
+            }
+            else
+            {
+                //System.Console.WriteLine($"Successfully loaded {tiles.Count} tiles from TileConfiguration.");
+            }
+
+            _configTiles = tiles.ToDictionary(a => Enum.Parse<TileType>(a.Type, true), ConvertFromConfigurationTile);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Tile"/> configuration for the specified <see cref="TileType"/>.
+        /// </summary>
+        /// <param name="tileType">The <see cref="TileType"/> to get the configuration for.</param>
+        /// <returns>The corresponding <see cref="Tile"/> object.</returns>
+        /// <exception cref="Exception">Thrown if no configuration is found for the specified <see cref="TileType"/>.</exception>
+        public static Tile Get(TileType tileType)
+        {
+            if (_configTiles == null) LoadConfiguration();
+            if (!_configTiles.TryGetValue(tileType, out var tile))
+                throw new Exception($"Missing tile configuration for tile type \"{tileType}\".");
+            return tile;
+        }
+
+        /// <summary>
+        /// Provides a custom JSON converter for handling character values.
         /// </summary>
         class CharacterConverter : JsonConverter
         {
-            /// <inheritdoc/>
+            /// <inheritdoc />
             public override bool CanConvert(Type objectType)
             {
                 return objectType == typeof(int);
             }
 
-            /// <inheritdoc/>
-            /// <summary>
-            /// Reads a JSON value and converts it into an integer glyph.
-            /// </summary>
-            /// <exception cref="JsonSerializationException">Thrown if the JSON value is invalid.</exception>
+            /// <inheritdoc />
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
                 if (reader.TokenType == JsonToken.String)
@@ -159,7 +156,8 @@ namespace Depths_of_Othaura.Data.World.Configuration
                     string strValue = (string)reader.Value;
                     if (!string.IsNullOrEmpty(strValue) && strValue.Length == 1)
                     {
-                        return (int)strValue[0]; // Convert character to ASCII integer value
+                        // Convert single character string to its ASCII integer value
+                        return (int)strValue[0];
                     }
                     throw new JsonSerializationException("String must contain exactly one character.");
                 }
@@ -171,10 +169,7 @@ namespace Depths_of_Othaura.Data.World.Configuration
                 throw new JsonSerializationException("Unsupported JSON token for integer or single-character string.");
             }
 
-            /// <inheritdoc/>
-            /// <summary>
-            /// Writes an integer glyph as a JSON value.
-            /// </summary>
+            /// <inheritdoc />
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
             {
                 // Serialize the integer as a number

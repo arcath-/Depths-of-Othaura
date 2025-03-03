@@ -1,24 +1,19 @@
-﻿using Depths_of_Othaura.Data.Screens;
-using GoRogue.FOV;
-using SadConsole.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using SadConsole.Entities;
 
 namespace Depths_of_Othaura.Data.Entities
 {
     /// <summary>
-    /// Manages all actors in the game world, including adding, removing, and tracking their positions.
+    /// Manages the actors in the game world, providing methods for adding, removing, and retrieving actors.
     /// </summary>
     internal sealed class ActorManager
     {
         /// <summary>
-        /// Dictionary that stores actors by their position in the game world.
+        /// Dictionary storing actors by their position.
         /// </summary>
         private readonly Dictionary<Point, Actor> _actors = [];
 
         /// <summary>
-        /// Manages entities within the game world.
+        /// Manages the actors' visual representation on the screen.
         /// </summary>
         public readonly EntityManager EntityComponent;
 
@@ -37,7 +32,7 @@ namespace Depths_of_Othaura.Data.Entities
         /// Adds an actor to the manager.
         /// </summary>
         /// <param name="actor">The actor to add.</param>
-        /// <returns>Returns <c>true</c> if the actor was added successfully; otherwise, <c>false</c>.</returns>
+        /// <returns><c>true</c> if the actor was added; otherwise, <c>false</c>.</returns>
         public bool Add(Actor actor)
         {
             if (ExistsAt(actor.Position)) return false;
@@ -53,7 +48,7 @@ namespace Depths_of_Othaura.Data.Entities
         /// Removes an actor from the manager.
         /// </summary>
         /// <param name="actor">The actor to remove.</param>
-        /// <returns>Returns <c>true</c> if the actor was removed successfully; otherwise, <c>false</c>.</returns>
+        /// <returns><c>true</c> if the actor was removed; otherwise, <c>false</c>.</returns>
         public bool Remove(Actor actor)
         {
             if (!ExistsAt(actor.Position)) return false;
@@ -66,10 +61,10 @@ namespace Depths_of_Othaura.Data.Entities
         }
 
         /// <summary>
-        /// Retrieves an actor at a specific point in the world.
+        /// Gets the actor at the specified point.
         /// </summary>
-        /// <param name="point">The position to check.</param>
-        /// <returns>The actor at the specified point, or <c>null</c> if no actor is found.</returns>
+        /// <param name="point">The point to get the actor at.</param>
+        /// <returns>The actor at the specified point, or <c>null</c> if no actor exists at the point.</returns>
         public Actor Get(Point point)
         {
             if (_actors.TryGetValue(point, out Actor actor))
@@ -78,27 +73,17 @@ namespace Depths_of_Othaura.Data.Entities
         }
 
         /// <summary>
-        /// Determines whether an actor exists at a specific position.
+        /// Checks if an actor exists at the specified point.
         /// </summary>
-        /// <param name="point">The position to check.</param>
-        /// <returns>Returns <c>true</c> if an actor exists at the given position; otherwise, <c>false</c>.</returns>
+        /// <param name="point">The point to check.</param>
+        /// <returns><c>true</c> if an actor exists at the point; otherwise, <c>false</c>.</returns>
         public bool ExistsAt(Point point)
         {
             return _actors.ContainsKey(point);
         }
 
         /// <summary>
-        /// Checks if a specific actor exists within the manager.
-        /// </summary>
-        /// <param name="actor">The actor to check.</param>
-        /// <returns>Returns <c>true</c> if the actor is found within the manager; otherwise, <c>false</c>.</returns>
-        public bool Contains(Actor actor)
-        {
-            return _actors.TryGetValue(actor.Position, out var actorAtPos) && actorAtPos.Equals(actor);
-        }
-
-        /// <summary>
-        /// Removes all actors from the manager.
+        /// Clears all actors from the manager.
         /// </summary>
         public void Clear()
         {
@@ -109,24 +94,11 @@ namespace Depths_of_Othaura.Data.Entities
         }
 
         /// <summary>
-        /// Updates the visibility of actors based on the player's field of view.
-        /// </summary>
-        /// <param name="fieldOfView">The field of view used to determine actor visibility. If not provided, the player's field of view is used.</param>
-        public void UpdateVisibility(IFOV fieldOfView = null)
-        {
-            var fov = fieldOfView ?? ScreenContainer.Instance.World.Player.FieldOfView;
-            foreach (var actor in _actors)
-            {
-                actor.Value.IsVisible = fov.BooleanResultView[actor.Key];
-            }
-        }
-
-        /// <summary>
-        /// Updates the position of an actor within the manager when it moves.
+        /// Updates the actor's position within the manager when its position changes.
         /// </summary>
         /// <param name="sender">The actor whose position changed.</param>
-        /// <param name="e">The old and new position values.</param>
-        /// <exception cref="Exception">Thrown if an actor attempts to move to an occupied position.</exception>
+        /// <param name="e">The event arguments containing the old and new positions.</param>
+        /// <exception cref="Exception">Thrown if the actor is moved to a position that is already occupied.</exception>
         private void UpdateActorPositionWithinManager(object sender, ValueChangedEventArgs<Point> e)
         {
             if (e.OldValue == e.NewValue) return;

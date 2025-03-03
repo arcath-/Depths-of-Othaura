@@ -1,20 +1,24 @@
-﻿using SadRogue.Primitives;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using SadRogue.Primitives;
 
 namespace Depths_of_Othaura.Data.World
 {
     /// <summary>
-    /// Represents the game's tile-based map, storing tile data and providing access methods.
+    /// Represents the game world's tile map.
     /// </summary>
     internal class Tilemap
     {
         /// <summary>
-        /// The width of the tilemap.
+        /// Gets the width of the tilemap.
         /// </summary>
         public readonly int Width;
 
         /// <summary>
-        /// The height of the tilemap.
+        /// Gets the height of the tilemap.
         /// </summary>
         public readonly int Height;
 
@@ -29,12 +33,12 @@ namespace Depths_of_Othaura.Data.World
         public int TileID { get; set; }
 
         /// <summary>
-        /// The collection of tiles that make up the tilemap.
+        /// Gets the array of tiles in the tilemap.
         /// </summary>
         public readonly Tile[] Tiles;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Tilemap"/> class with a specified width and height.
+        /// Initializes a new instance of the <see cref="Tilemap"/> class.
         /// </summary>
         /// <param name="width">The width of the tilemap.</param>
         /// <param name="height">The height of the tilemap.</param>
@@ -58,24 +62,25 @@ namespace Depths_of_Othaura.Data.World
         }
 
         /// <summary>
-        /// Gets the tile at the specified (x, y) position.
+        /// Gets the tile at the specified coordinates.
         /// </summary>
-        /// <param name="x">The X-coordinate of the tile.</param>
-        /// <param name="y">The Y-coordinate of the tile.</param>
-        /// <param name="throwExceptionWhenOutOfBounds">Determines whether an exception is thrown when accessing an out-of-bounds tile.</param>
-        /// <returns>The tile at the specified position.</returns>
+        /// <param name="x">The X coordinate of the tile.</param>
+        /// <param name="y">The Y coordinate of the tile.</param>
+        /// <param name="throwExceptionWhenOutOfBounds">If <c>true</c>, throws an exception if the coordinates are out of bounds.</param>
+        /// <returns>The tile at the specified coordinates, or <c>null</c> if out of bounds and <paramref name="throwExceptionWhenOutOfBounds"/> is <c>false</c>.</returns>
+        /// <exception cref="Exception">Thrown if the coordinates are out of bounds and <paramref name="throwExceptionWhenOutOfBounds"/> is <c>true</c>.</exception>
         public Tile this[int x, int y, bool throwExceptionWhenOutOfBounds = true]
         {
             get => this[Point.ToIndex(x, y, Width), throwExceptionWhenOutOfBounds];
         }
 
         /// <summary>
-        /// Gets the tile at the specified index in the tile array.
+        /// Gets the tile at the specified index.
         /// </summary>
-        /// <param name="index">The index position in the tile array.</param>
-        /// <param name="throwExceptionWhenOutOfBounds">Determines whether an exception is thrown when accessing an out-of-bounds tile.</param>
-        /// <returns>The tile at the specified index.</returns>
-        /// <exception cref="Exception">Thrown if the tile index is out of bounds and exception throwing is enabled.</exception>
+        /// <param name="index">The index of the tile.</param>
+        /// <param name="throwExceptionWhenOutOfBounds">If <c>true</c>, throws an exception if the index is out of bounds.</param>
+        /// <returns>The tile at the specified index, or <c>null</c> if out of bounds and <paramref name="throwExceptionWhenOutOfBounds"/> is <c>false</c>.</returns>
+        /// <exception cref="Exception">Thrown if the index is out of bounds and <paramref name="throwExceptionWhenOutOfBounds"/> is <c>true</c>.</exception>
         public Tile this[int index, bool throwExceptionWhenOutOfBounds = true]
         {
             get
@@ -92,18 +97,18 @@ namespace Depths_of_Othaura.Data.World
         }
 
         /// <summary>
-        /// Determines whether the specified (x, y) position is within the bounds of the tilemap.
+        /// Checks if the given coordinates are within the bounds of the tilemap.
         /// </summary>
-        /// <param name="x">The X-coordinate to check.</param>
-        /// <param name="y">The Y-coordinate to check.</param>
-        /// <returns>Returns <c>true</c> if the position is within bounds; otherwise, <c>false</c>.</returns>
+        /// <param name="x">The X coordinate to check.</param>
+        /// <param name="y">The Y coordinate to check.</param>
+        /// <returns><c>true</c> if the coordinates are within bounds; otherwise, <c>false</c>.</returns>
         public bool InBounds(int x, int y)
         {
             return x >= 0 && y >= 0 && x < Width && y < Height;
         }
 
         /// <summary>
-        /// Resets all tiles in the tilemap to their default state.
+        /// Resets the tilemap by clearing each tile and setting its obstruction type to <see cref="ObstructionType.FullyBlocked"/>.
         /// </summary>
         public void Reset()
         {
@@ -111,12 +116,9 @@ namespace Depths_of_Othaura.Data.World
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    int index = Point.ToIndex(x, y, Width);
-                    Tiles[index].Type = TileType.None;
-                    Tiles[index].InFov = false;
-                    Tiles[index].IsVisible = false;
-                    Tiles[index].Obstruction = ObstructionType.FullyBlocked;
-                    Tiles[index].Clear();
+                    Tiles[Point.ToIndex(x, y, Width)].Clear();
+                    Tiles[Point.ToIndex(x, y, Width)].Obstruction = ObstructionType.FullyBlocked;
+                    //Tiles[Point.ToIndex(x, y, Width)].Glyph = (char)(Constants.AsciiRenderMode ? AsciiID : TileID);
                 }
             }
         }
@@ -141,7 +143,7 @@ namespace Depths_of_Othaura.Data.World
 
                     // Update glyph dynamically based on the current mode
                     tile.UpdateGlyph();
-
+                    
                     // Debug log to verify update
                     //System.Console.WriteLine($"Tile[{x}, {y}] after update: {tile.Glyph}");
                 }

@@ -1,265 +1,89 @@
 ﻿using Depths_of_Othaura.Data.Screens;
 using Depths_of_Othaura.Data.World;
-using Depths_of_Othaura.Data.Logic;
+using Depths_of_Othaura.Input;
 using SadConsole.Input;
 using SadRogue.Primitives;
-using SadRogue.Primitives.GridViews;
-using GoRogue.FOV;
-using System.Collections.Generic;
+using Color = SadRogue.Primitives.Color;
 
 namespace Depths_of_Othaura.Data.Entities.Actors
 {
     /// <summary>
-    /// Represents the player-controlled character in the game.
+    /// Represents the player character in the game.
     /// </summary>
     internal class Player : Actor
     {
-        /// <summary>
-        /// The player's field of view.
-        /// </summary>
-        public IFOV FieldOfView { get; }
-
-        private int _fovRadius = Constants.PlayerFieldOfViewRadius;
+        private readonly InputHandler _inputHandler = new();
+        private readonly Tilemap _tilemap; // Add this
 
         /// <summary>
-        /// The radius of the player's field of view.
-        /// Adjusting this property recalculates the field of view.
-        /// </summary>
-        public int FovRadius
-        {
-            get => _fovRadius;
-            set
-            {
-                _fovRadius = value;
-
-                // Recalculate field of view on radius change
-                FieldOfView.Calculate(Position, _fovRadius);
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Player"/> class at the given position.
+        /// Initializes a new instance of the <see cref="Player"/> class.
         /// </summary>
         /// <param name="position">The starting position of the player.</param>
-        public Player(Point position)
-            : base(Color.White, Color.Transparent, '@', zIndex: int.MaxValue, maxHealth: 100)
+        /// <param name="tilemap">The tilemap to use for FOV calculations and movement.</param>
+        public Player(Point position, Tilemap tilemap) : base(Color.White, Color.Transparent, '@', zIndex: int.MaxValue, maxHealth: 100)
         {
-            Name = "Rogue";
-
-            // Setup field of view map
-            var tilemap = ScreenContainer.Instance.World.Tilemap;
-            FieldOfView = new RecursiveShadowcastingFOV(new LambdaGridView<bool>(tilemap.Width, tilemap.Height,
-                (point) => !BlocksFov(tilemap[point.X, point.Y].Obstruction)));
+            _tilemap = tilemap ?? throw new ArgumentNullException(nameof(tilemap));
 
             IsFocused = true;
             PositionChanged += Player_PositionChanged;
-            Position = position;
+
+            if (!Move(position.X, position.Y))
+                throw new Exception($"Unable to move player to spawn position: {position}");
         }
 
         /// <summary>
-        /// Marks all tiles within the current field of view as explored.
+        /// Processes keyboard input for player actions, such as movement and toggling render/debug modes.
         /// </summary>
-        public void ExploreCurrentFov()
-        {
-            var tilemap = ScreenContainer.Instance.World.Tilemap;
-            foreach (var point in FieldOfView.CurrentFOV)
-            {
-                tilemap[point.X, point.Y].IsVisible = true;
-                tilemap[point.X, point.Y].InFov = true;
-                ScreenContainer.Instance.World.Surface.IsDirty = true;
-            }
-        }
-
-        /// <summary>
-        /// Updates the visibility status of tiles within the player's field of view.
-        /// </summary>
-        private void ExploreTilemap()
-        {
-            var tilemap = ScreenContainer.Instance.World.Tilemap;
-
-            // Mark newly seen tiles
-            foreach (var point in FieldOfView.NewlySeen)
-            {
-                tilemap[point.X, point.Y].IsVisible = true;
-                tilemap[point.X, point.Y].InFov = true;
-                ScreenContainer.Instance.World.Surface.IsDirty = true;
-            }
-
-            // Mark tiles that are no longer in view
-            foreach (var point in FieldOfView.NewlyUnseen)
-            {
-                tilemap[point.X, point.Y].InFov = false;
-                ScreenContainer.Instance.World.Surface.IsDirty = true;
-            }
-        }
-
-        /// <summary>
-        /// Handles updates when the player's position changes.
-        /// </summary>
-        /// <param name="sender">The object triggering the event.</param>
-        /// <param name="e">The event arguments containing the old and new position.</param>
-        private void Player_PositionChanged(object sender, ValueChangedEventArgs<Point> e)
-        {
-            IFOV fov;
-            // Recalculate the player's field of view
-            if (!Constants.DebugMode) // Check if DebugMode is OFF
-            {
-                FieldOfView.Calculate(e.NewValue, FovRadius);
-                fov = FieldOfView;
-            }
-            else
-            {
-                fov = ScreenContainer.Instance.FullMapFOV;
-            }
-
-            // Update visibility of all actors based on the  FOV
-            ScreenContainer.Instance.World.ActorManager.UpdateVisibility(fov);
-
-            // Explore newly visible areas
-            ExploreTilemap();
-        }
-
-        /// <summary>
-        /// Determines whether a given obstruction type blocks field of view.
-        /// </summary>
-        /// <param name="obstructionType">The obstruction type to check.</param>
-        /// <returns>Returns <c>true</c> if the obstruction blocks vision; otherwise, <c>false</c>.</returns>
-        private static bool BlocksFov(ObstructionType obstructionType)
-        {
-            return obstructionType switch
-            {
-                ObstructionType.VisionBlocked or ObstructionType.FullyBlocked => true,
-                _ => false,
-            };
-        }
-
-        /// <summary>
-        /// A dictionary mapping player movement keys to movement directions.
-        /// </summary>
-        private readonly Dictionary<Keys, Direction> _playerMovements = new()
-        {
-            {Keys.W, Direction.Up},
-            {Keys.A, Direction.Left},
-            {Keys.S, Direction.Down},
-            {Keys.D, Direction.Right}
-        };
-
-        /// <summary>
-        /// Processes player input for movement.
-        /// </summary>
-        /// <param name="keyboard">The keyboard input object.</param>
-        /// <returns>Returns <c>true</c> if an action was performed; otherwise, <c>false</c>.</returns>
+        /// <param name="keyboard">The keyboard state to process.</param>
+        /// <returns><c>true</c> if keyboard input was processed; otherwise, <c>false</c>.</returns>
         public override bool ProcessKeyboard(Keyboard keyboard)
         {
-            if (!UseKeyboard) return false;
-            var moved = false;
-            foreach (var kvp in _playerMovements)
-            {
-                if (keyboard.IsKeyPressed(kvp.Key))
-                {
-                    var moveDirection = kvp.Value;
-                    moved = Move(moveDirection);
-                    break;
-                }
-            }
-
-            // Press 'T' to toggle between ASCII and Tile mode
-            if (keyboard.IsKeyPressed(Keys.T))
-            {
-                // clear and update the glyphs
-                ScreenContainer.Instance.World.ToggleRenderMode();
-            }
-
-            // Press 'F1' to toggle debug mode
-            if (keyboard.IsKeyPressed(Keys.F1))
-            {
-                System.Console.WriteLine($"Debug before toggle: {Constants.DebugMode}");
-                ScreenContainer.Instance.World.ToggleDebugMode();
-                OnDebugModeChanged(ScreenContainer.Instance.World.Tilemap);
-                System.Console.WriteLine($"Debug after toggle: {Constants.DebugMode}");
-            }
-
-            return base.ProcessKeyboard(keyboard) || moved;
+            return _inputHandler.ProcessKeyboard(keyboard, this) || base.ProcessKeyboard(keyboard);
         }
+
+        
 
         /// <summary>
-        /// Moves the player to the specified position and triggers game logic.
+        /// Handles the player's position changing.
         /// </summary>
-        /// <param name="x">The target X-coordinate.</param>
-        /// <param name="y">The target Y-coordinate.</param>
-        /// <returns>Returns <c>true</c> if the move was successful; otherwise, <c>false</c>.</returns>
-        public override bool Move(int x, int y)
+        /// <param name="sender">The object that raised the event.</param>
+        /// <param name="e">The event arguments containing the old and new positions.</param>
+        private void Player_PositionChanged(object sender, ValueChangedEventArgs<Point> e)
         {
-            var moved = base.Move(x, y);
-
-            // Execute game logic tick on movement, even if movement fails, only if alive.
-            if (IsAlive)
-                GameLogic.Tick(new Point(x, y));
-
-            return moved;
+            var world = ScreenContainer.Instance.World;
+            
         }
 
-        /// <summary>
-        /// Applies damage to the player and updates the stats screen.
-        /// </summary>
-        /// <param name="health">The amount of health to subtract.</param>
-        public override void ApplyDamage(int health)
+        public bool Move(Direction direction)
         {
-            base.ApplyDamage(health);
-            ScreenContainer.Instance.PlayerStats.UpdatePlayerStats();
+            var position = Position + direction;
+            return Move(position.X, position.Y);
         }
 
-        /// <summary>
-        /// Updates all tile glyphs based on the current debug state
-        /// </summary>
-        private void OnDebugModeChanged(Tilemap tilemap)
+        public bool Move(int x, int y)
         {
-            UpdateFOV(tilemap); // Call the UpdateFOV method, which is used to alter the tiles
-            ScreenContainer.Instance.World.Surface.IsDirty = true;
-        }
+            var actorManager = Depths_of_Othaura.Data.Screens.ScreenContainer.Instance.World.ActorManager;
 
-        private void UpdateFOV(Tilemap tilemap)
-        {
-            if (Constants.DebugMode)
+            if (!IsAlive) return false;
+
+            // If the position is out of bounds, don't allow movement
+            if (!_tilemap.InBounds(x, y)) return false;
+
+            // If another actor already exists at the location, don't allow movement
+            if (actorManager.ExistsAt((x, y))) return false;
+
+            // Don't allow movement for these cases
+            var obstruction = _tilemap[x, y].Obstruction;
+            switch (obstruction)
             {
-                // Disable FOV: Set all tiles to InFov = true and IsVisible = true
-                for (int x = 0; x < tilemap.Width; x++)
-                {
-                    for (int y = 0; y < tilemap.Height; y++)
-                    {
-                        tilemap[x, y].InFov = true;
-                        tilemap[x, y].IsVisible = true;  // Ensure tiles are marked as visible
-                        ScreenContainer.Instance.World.Surface.IsDirty = true; // And surface is dirty
-                    }
-                }
+                case World.ObstructionType.FullyBlocked:
+                case World.ObstructionType.MovementBlocked:
+                    return false;
             }
-            else
-            {
-                // Restore original FOV
-                RestoreFOV(tilemap);
-            }
-        }
 
-        private void RestoreFOV(Tilemap tilemap)
-        {
-            // Calculate fov to clear any non-visibile walls
-
-            for (int x = 0; x < tilemap.Width; x++)
-            {
-                for (int y = 0; y < tilemap.Height; y++)
-                {
-                    FieldOfView.Calculate(Position, FovRadius);
-
-                    ExploreTilemap();
-
-                    if (!FieldOfView.BooleanResultView[x, y])
-                    {
-                        tilemap[x, y].InFov = false;
-                        tilemap[x, y].IsVisible = false;
-                        ScreenContainer.Instance.World.Surface.IsDirty = true;
-                    }
-                }
-            }
+            // Set new position
+            Position = new SadRogue.Primitives.Point(x, y);
+            return true;
         }
     }
 }

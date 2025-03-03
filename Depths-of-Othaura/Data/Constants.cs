@@ -22,11 +22,6 @@
         public const string TileConfiguration = "Data/World/Configuration/tiles.json";
 
         /// <summary>
-        /// Default radius for the player's field of view.
-        /// </summary>
-        public const int PlayerFieldOfViewRadius = 6;
-
-        /// <summary>
         /// Toggle for Ascii/Tiles toggle. Default set to true.
         /// </summary>
         public static bool AsciiRenderMode = true;
@@ -35,5 +30,19 @@
         /// Toggle for Debug toggle. Default set to false.
         /// </summary>
         public static bool DebugMode = false;
+
+        /// <summary>
+        /// The width of the game screen in cells.
+        /// </summary>
+        public const int ScreenWidth = 80;
+
+        /// <summary>
+        /// The height of the game screen in cells.
+        /// </summary>
+        public const int ScreenHeight = 25;
+
+        /// <summary>
+        /// Field of View
+        public const int PlayerFieldOfViewRadius = 6;
     }
 }

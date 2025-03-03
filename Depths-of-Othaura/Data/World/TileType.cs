@@ -1,4 +1,10 @@
-﻿namespace Depths_of_Othaura.Data.World
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Depths_of_Othaura.Data.World
 {
     /// <summary>
     /// Defines the different types of tiles in the game world.
