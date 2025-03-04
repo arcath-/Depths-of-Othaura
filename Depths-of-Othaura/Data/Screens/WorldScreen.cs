@@ -53,29 +53,27 @@ namespace Depths_of_Othaura.Data.Screens
         /// <param name="height">The height of the screen in cells.</param>
         public WorldScreen(int width, int height) : base(width, height)
         {
-            // Setup tilemap
             Tilemap = new Tilemap(width, height);
-
-            // Setup a new surface matching with our tiles
             Surface = new CellSurface(width, height, Tilemap.Tiles);
 
             ActorManager = new ActorManager();
             SadComponents.Add(ActorManager.EntityComponent);
 
-            // Add the fov manager
             _fovManager = new FOVManager(this);
 
-            Point point;
-            // This is for setting everything, just the IsVisibilty which should be black.
+            // Set all tiles as "Not Seen"
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    point = new Point(x, y);
-                    SetTileVisibility(point, false); //Setting to what will be on 
+                    Tile tile = Tilemap[x, y];
+                    tile.IsVisible = false;
+                    tile.HasBeenLit = false;  // Never seen before
+                    tile.Foreground = Color.Black; // Initial color for unseen
                 }
             }
         }
+
 
         /// <summary>
         /// Generates the initial world content.

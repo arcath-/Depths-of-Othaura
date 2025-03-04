@@ -48,19 +48,22 @@ namespace Depths_of_Othaura.Data.World
             _baseTileForValues = world.Tilemap[0, 0]; //Cache, it will never change.
             _unseenColor = CalculateUnseenColor(_baseTileForValues);
 
-            Point point;
-            // This is for setting everything, just the IsVisibilty which should be black.
+            //Initialize the map to not visible
+            InitilizeNotVisible();
+
+        }
+
+        //To initialize everything to a default, so all will be black.
+        private void InitilizeNotVisible()
+        {
             for (int x = 0; x < _width; x++)
             {
                 for (int y = 0; y < _height; y++)
                 {
-                    point = new Point(x, y);
-                    ApplyFov(point, _world.Tilemap, false);
+                    Point point = new Point(x, y);
+                    _world.SetTileVisibility(point, false);
                 }
             }
-
-            //Initally set the level to all explored at the start.
-            _fieldOfView.Calculate(0, 0, 0); //This will get called every frame.
         }
 
         /// <summary>
@@ -154,15 +157,12 @@ namespace Depths_of_Othaura.Data.World
 
             if (inFov)
             {
-                //Set the base values
-                //No longer setting to what was set before, but making sure it stays lit.
-                //This is needed for lighting, otherwise it will look wierd, with darkness behind it.
-
-                //But you will have a problem now when the color gets changed it wont be tracked properly.
-                //Tile needs its own color.
+                // Tile is currently in FOV, show its actual color
                 tilemap[point.X, point.Y].Foreground = _baseTileForValues.Foreground;
                 tilemap[point.X, point.Y].Background = _baseTileForValues.Background;
                 tilemap[point.X, point.Y].HasBeenLit = true;
+
+                _world.SetTileVisibility(point, tilemap[point.X, point.Y].IsVisible);
 
             }
             else
@@ -170,20 +170,24 @@ namespace Depths_of_Othaura.Data.World
                 //If we have been in the level before, use those instead.
                 if (tilemap[point.X, point.Y].HasBeenLit)
                 {
-                    tilemap[point.X, point.Y].Foreground = _unseenColor;
-                    tilemap[point.X, point.Y].Background = Color.Transparent; //Always black
+                    // Tile has been seen before, so make it dark gray
+                    tilemap[point.X, point.Y].Foreground = Color.Lerp(_baseTileForValues.Foreground, Color.Black, 0.7f);
+
+                    _world.SetTileVisibility(point, tilemap[point.X, point.Y].IsVisible);
                 }
                 else
                 {
                     //set the unseen values
-                    tilemap[point.X, point.Y].Foreground = _unseenColor;
-                    tilemap[point.X, point.Y].Background = Color.Transparent; //Always black
+                    // Completely unseen tile remains black
+                    tilemap[point.X, point.Y].Foreground = Color.Black;
+                    tilemap[point.X, point.Y].Background = Color.Transparent;
+                    _world.SetTileVisibility(point, tilemap[point.X, point.Y].IsVisible);
                 }
+
+
             }
 
-            _world.SetTileVisibility(point, tilemap[point.X, point.Y].IsVisible);
 
-            //_world.Surface.IsDirty = true; Remove, as SetTileVisibilty is handled by the Surface.
         }
 
         /// <summary>
