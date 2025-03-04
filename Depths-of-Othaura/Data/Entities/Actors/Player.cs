@@ -41,7 +41,18 @@ namespace Depths_of_Othaura.Data.Entities.Actors
             return _inputHandler.ProcessKeyboard(keyboard, this) || base.ProcessKeyboard(keyboard);
         }
 
-        
+        private int _fovRadius = Constants.PlayerFieldOfViewRadius;
+        /// <summary>
+        /// Gets or sets the field-of-view radius for the player.
+        /// </summary>
+        public int FovRadius
+        {
+            get => _fovRadius;
+            set
+            {
+                _fovRadius = value;
+            }
+        }
 
         /// <summary>
         /// Handles the player's position changing.
@@ -51,7 +62,8 @@ namespace Depths_of_Othaura.Data.Entities.Actors
         private void Player_PositionChanged(object sender, ValueChangedEventArgs<Point> e)
         {
             var world = ScreenContainer.Instance.World;
-            
+            // Calculate the field of view for the player's position
+            world.FovManager.CalculateFOV(this);
         }
 
         public bool Move(Direction direction)

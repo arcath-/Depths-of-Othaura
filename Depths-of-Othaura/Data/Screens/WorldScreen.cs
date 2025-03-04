@@ -3,6 +3,11 @@ using Depths_of_Othaura.Data.Entities.Actors;
 using Depths_of_Othaura.Data.World;
 using Depths_of_Othaura.Data.World.WorldGen;
 using SadConsole;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Depths_of_Othaura.Data.Screens
 {
@@ -32,6 +37,16 @@ namespace Depths_of_Othaura.Data.Screens
         private IReadOnlyList<Rectangle> _dungeonRooms;
 
         /// <summary>
+        /// Manages the field of view for the game.
+        /// </summary>
+        private readonly FOVManager _fovManager;
+
+        /// <summary>
+        /// Exposes the field of view manager.
+        /// </summary>
+        public FOVManager FovManager => _fovManager;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="WorldScreen"/> class.
         /// </summary>
         /// <param name="width">The width of the screen in cells.</param>
@@ -47,7 +62,19 @@ namespace Depths_of_Othaura.Data.Screens
             ActorManager = new ActorManager();
             SadComponents.Add(ActorManager.EntityComponent);
 
-            
+            // Add the fov manager
+            _fovManager = new FOVManager(this);
+
+            Point point;
+            // This is for setting everything, just the IsVisibilty which should be black.
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    point = new Point(x, y);
+                    SetTileVisibility(point, false); //Setting to what will be on 
+                }
+            }
         }
 
         /// <summary>
@@ -69,7 +96,8 @@ namespace Depths_of_Othaura.Data.Screens
         public void CreatePlayer()
         {
             Player = new Player(_dungeonRooms[0].Center, Tilemap);
-            ActorManager.Add(Player);            
+            ActorManager.Add(Player);
+            _fovManager.CalculateFOV(Player);
         }
 
         /// <summary>
@@ -96,11 +124,19 @@ namespace Depths_of_Othaura.Data.Screens
             Constants.DebugMode = !Constants.DebugMode;
             System.Console.WriteLine($"Debug mode toggled: {(Constants.DebugMode ? "On" : "Off")}");
 
-            
-            // TODO : Add removal of FOV on debug = true.
+            _fovManager.ToggleVisibility(Constants.DebugMode);
+
             // TODO: Add a red outline around the screen to show you are in debug.
         }
 
-        
+        /// <summary>
+        /// Toggles the visibility of the entire map
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="isVisible"></param>
+        public void SetTileVisibility(Point point, bool isVisible)
+        {
+            Surface.SetCellAppearance(point.X, point.Y, Tilemap[point.X, point.Y]);
+        }
     }
 }

@@ -42,6 +42,8 @@ namespace Depths_of_Othaura.Data.World
         {
             X = x;
             Y = y;
+            Foreground = Color.White; //Force these to be initlized as white so that Fov will work.
+            Background = Color.Transparent;
             CopyFromConfiguration();
         }
 
@@ -92,7 +94,9 @@ namespace Depths_of_Othaura.Data.World
             AsciiID = configurationTile.AsciiID;
             TileID = configurationTile.TileID;
 
-            
+            // Set the default for tiles
+            HasBeenLit = false;
+            IsVisible = false;
         }
 
         /// <summary>
@@ -101,8 +105,13 @@ namespace Depths_of_Othaura.Data.World
         /// </summary>
         public void UpdateGlyph()
         {
-            Glyph = (Constants.AsciiRenderMode ? AsciiID : TileID);
+            Glyph = (char)(Constants.AsciiRenderMode ? AsciiID : TileID);
         }
+
+        /// <summary>
+        /// Gets if it HasBeenLit
+        /// </summary>
+        public bool HasBeenLit { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the tile is visible.
