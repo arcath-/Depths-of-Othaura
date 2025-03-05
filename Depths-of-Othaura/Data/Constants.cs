@@ -32,16 +32,6 @@
         public static bool DebugMode = false;
 
         /// <summary>
-        /// The width of the game screen in cells.
-        /// </summary>
-        public const int ScreenWidth = 80;
-
-        /// <summary>
-        /// The height of the game screen in cells.
-        /// </summary>
-        public const int ScreenHeight = 25;
-
-        /// <summary>
         /// Field of View
         public const int PlayerFieldOfViewRadius = 6;
     }
