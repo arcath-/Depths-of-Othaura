@@ -1,7 +1,9 @@
 ﻿using Depths_of_Othaura.Data.Entities.Actors;
 using Depths_of_Othaura.Data.Screens;
 using Depths_of_Othaura.Data.World;
+using Depths_of_Othaura.Data.World.Configuration;
 using GoRogue.FOV;
+using SadConsole;
 using SadRogue.Primitives;
 using SadRogue.Primitives.GridViews;
 using Color = SadRogue.Primitives.Color;
@@ -14,16 +16,20 @@ namespace Depths_of_Othaura.Data.World
     internal class FOVManager
     {
         private readonly WorldScreen _world;
-        private readonly IFOV _fieldOfView; //This should not be instantiated every movement.
+        private readonly IFOV _fieldOfView;
         private readonly LambdaGridView<bool> _fovGrid;
         private readonly bool[,] _currentFOV;
         private readonly int _width;
         private readonly int _height;
 
-        //Cache color
+        // Cache color
         private readonly Color _unseenColor;
         private readonly Tile _baseTileForValues;
         private bool _disableFov = false;
+
+        // Store the map state before debug mode is enabled
+        private (Color foreground, Color background, int glyph)[,] _previousMapState;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FOVManager"/> class.
@@ -88,32 +94,74 @@ namespace Depths_of_Othaura.Data.World
             _world.Surface.IsDirty = true; // Force a redraw
 
             var tilemap = _world.Tilemap;
+            if (isEnabled)
+            {
+                SaveMapState(tilemap); // Save the current map state
 
-            //This is to turn off the value,
+                for (int x = 0; x < _width; x++)
+                {
+                    for (int y = 0; y < _height; y++)
+                    {
+                        Point point = new Point(x, y);
+                        Tile tile = tilemap[x, y];
+
+                        // Set the tile's colors to the base tile colors
+                        var baseTile = TilesConfig.Get(tile.Type); //Get a sample config to load color.
+
+                        tilemap[x, y].Foreground = baseTile.Foreground;
+                        tilemap[x, y].Background = baseTile.Background;
+
+                        //Set tilemode
+                        tilemap[x, y].Glyph = Constants.AsciiRenderMode ? baseTile.AsciiID : baseTile.TileID;
+
+                        // Directly manipulate the surface
+                        _world.Surface.SetCellAppearance(point.X, point.Y, tile);
+                    }
+                }
+            }
+            else
+            {
+                RestoreMapState(tilemap);
+            }
+            _world.Surface.IsDirty = true; // Force a redraw
+        }
+
+        private void SaveMapState(Tilemap tilemap)
+        {
+            _previousMapState = new (Color foreground, Color background, int glyph)[_width, _height];
+            for (int x = 0; x < _width; x++)
+            {
+                for (int y = 0; y < _height; y++)
+                {
+                    _previousMapState[x, y] = (tilemap[x, y].Foreground, tilemap[x, y].Background, tilemap[x, y].Glyph);
+                }
+            }
+        }
+
+        private void RestoreMapState(Tilemap tilemap)
+        {
+            if (_previousMapState == null) return; // Nothing to restore
+
             for (int x = 0; x < _width; x++)
             {
                 for (int y = 0; y < _height; y++)
                 {
                     Point point = new Point(x, y);
-                    Color baseColor = isEnabled ? _unseenColor : _baseTileForValues.Foreground;
+                    tilemap[x, y].Foreground = _previousMapState[x, y].foreground;
+                    tilemap[x, y].Background = _previousMapState[x, y].background;
+                    tilemap[x, y].Glyph = _previousMapState[x, y].glyph;
+                    var baseTile = TilesConfig.Get(tilemap[x, y].Type);
 
-                    tilemap[point.X, point.Y].Foreground = baseColor;
-                    //tilemap[point.X, point.Y].IsVisible = !isEnabled; //Now it turns it all off.
+                    tilemap[x, y].Glyph = Constants.AsciiRenderMode ? baseTile.AsciiID : baseTile.TileID;
 
-                    if (isEnabled)
-                    {
-                        //Set the tiles that were previouslyHasBeenLit to a explored state if visibility is going off.
-                        if (tilemap[point.X, point.Y].HasBeenLit)
-                        {
-                            //Its the explored style
-                            tilemap[point.X, point.Y].Foreground = _unseenColor;
-                            tilemap[point.X, point.Y].Background = Color.Transparent;
-                        }
-                    }
-
-                    _world.SetTileVisibility(point, !isEnabled);
+                    // Restore the glyph based on current render mode (ASCII or Tile)
+                    // Set visibility to true so the tile is rendered
+                    _world.Surface.SetCellAppearance(point.X, point.Y, tilemap[x, y]);
                 }
             }
+            _previousMapState = null; // Clear the saved state
+            CalculateFOV(_world.Player); // Recalculate FOV after debug is disabled
+            _world.Surface.IsDirty = true; // Force a redraw
         }
 
         /// <summary>
@@ -159,12 +207,14 @@ namespace Depths_of_Othaura.Data.World
             if (inFov)
             {
                 // Tile is currently in FOV, show its actual color
-                tilemap[point.X, point.Y].Foreground = _baseTileForValues.Foreground;
-                tilemap[point.X, point.Y].Background = _baseTileForValues.Background;
+                // Get the base tile configuration
+                var baseTile = TilesConfig.Get(tilemap[point.X, point.Y].Type);
+
+                tilemap[point.X, point.Y].Foreground = baseTile.Foreground;
+                tilemap[point.X, point.Y].Background = baseTile.Background;
                 tilemap[point.X, point.Y].HasBeenLit = true;
 
-                _world.SetTileVisibility(point, tilemap[point.X, point.Y].IsVisible);
-
+                _world.Surface.SetCellAppearance(point.X, point.Y, tilemap[point.X, point.Y]);
             }
             else
             {
@@ -172,9 +222,12 @@ namespace Depths_of_Othaura.Data.World
                 if (tilemap[point.X, point.Y].HasBeenLit)
                 {
                     // Tile has been seen before, so make it dark gray
-                    tilemap[point.X, point.Y].Foreground = Color.Lerp(_baseTileForValues.Foreground, Color.Black, 0.7f);
+                    // Get the base tile configuration
+                    var baseTile = TilesConfig.Get(tilemap[point.X, point.Y].Type);
 
-                    _world.SetTileVisibility(point, tilemap[point.X, point.Y].IsVisible);
+                    tilemap[point.X, point.Y].Foreground = Color.Lerp(baseTile.Foreground, Color.Black, 0.7f);
+
+                    _world.Surface.SetCellAppearance(point.X, point.Y, tilemap[point.X, point.Y]);
                 }
                 else
                 {
@@ -182,7 +235,7 @@ namespace Depths_of_Othaura.Data.World
                     // Completely unseen tile remains black
                     tilemap[point.X, point.Y].Foreground = Color.Black;
                     tilemap[point.X, point.Y].Background = Color.Transparent;
-                    _world.SetTileVisibility(point, tilemap[point.X, point.Y].IsVisible);
+                    _world.Surface.SetCellAppearance(point.X, point.Y, tilemap[point.X, point.Y]);
                 }
 
 

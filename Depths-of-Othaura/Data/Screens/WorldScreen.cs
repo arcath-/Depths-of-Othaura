@@ -135,20 +135,23 @@ namespace Depths_of_Othaura.Data.Screens
         /// </summary>
         /// <param name="point"></param>
         /// <param name="isVisible"></param>
+        // In WorldScreen.SetTileVisibility
         public void SetTileVisibility(Point point, bool isVisible)
         {
-            //Console.WriteLine($"SetTileVisibility called for ({point.X}, {point.Y}) - Visible: {isVisible}");
+            Tile tile = Tilemap[point.X, point.Y];
 
             if (isVisible)
             {
-                Surface.SetCellAppearance(point.X, point.Y, Tilemap[point.X, point.Y]);
+                Surface.SetCellAppearance(point.X, point.Y, tile); // Use the Tile object directly
             }
-            else if (Tilemap[point.X, point.Y].HasBeenLit) // Previously seen but not in FOV
+            else if (Tilemap[point.X, point.Y].HasBeenLit)
             {
-                Surface.SetCellAppearance(point.X, point.Y, new ColoredGlyph(Color.DarkGray, Color.Black, Tilemap[point.X, point.Y].Glyph));
+                //Set previously seen color.
+                Surface.SetCellAppearance(point.X, point.Y, new ColoredGlyph(Color.Lerp(Tilemap[point.X, point.Y].Foreground, Color.Black, 0.7f), Color.Black, Tilemap[point.X, point.Y].Glyph));
             }
-            else // Completely unexplored
+            else
             {
+                // Completely unexplored
                 Surface.SetCellAppearance(point.X, point.Y, new ColoredGlyph(Color.Black, Color.Black, ' '));
             }
         }

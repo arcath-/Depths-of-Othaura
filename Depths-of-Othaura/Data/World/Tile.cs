@@ -80,7 +80,7 @@ namespace Depths_of_Othaura.Data.World
         /// Copies the tile configuration settings from the configuration data.
         /// Updates the tile's appearance and obstruction settings.
         /// </summary>
-        private void CopyFromConfiguration()
+        public void CopyFromConfiguration()
         {
             // Copy over the appearance from the configuration tile
             var configurationTile = TilesConfig.Get(Type);
