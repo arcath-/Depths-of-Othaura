@@ -42,10 +42,11 @@ namespace Depths_of_Othaura.Data.World
         {
             X = x;
             Y = y;
-            Foreground = Color.White; //Force these to be initlized as white so that Fov will work.
-            Background = Color.Transparent;
+            Foreground = Color.Black;
+            Background = Color.Black; // Start fully blacked out
             CopyFromConfiguration();
         }
+
 
         private TileType _tileType;
         /// <summary>

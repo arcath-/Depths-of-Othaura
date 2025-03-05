@@ -61,10 +61,11 @@ namespace Depths_of_Othaura.Data.World
                 for (int y = 0; y < _height; y++)
                 {
                     Point point = new Point(x, y);
-                    _world.SetTileVisibility(point, false);
+                    _world.SetTileVisibility(point, false); // Ensures all unexplored tiles are blacked out
                 }
             }
         }
+
 
         /// <summary>
         /// Calculates the field of view for the specified player.

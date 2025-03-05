@@ -134,7 +134,19 @@ namespace Depths_of_Othaura.Data.Screens
         /// <param name="isVisible"></param>
         public void SetTileVisibility(Point point, bool isVisible)
         {
-            Surface.SetCellAppearance(point.X, point.Y, Tilemap[point.X, point.Y]);
+            if (isVisible)
+            {
+                Surface.SetCellAppearance(point.X, point.Y, Tilemap[point.X, point.Y]);
+            }
+            else if (Tilemap[point.X, point.Y].HasBeenLit) // Previously seen but not in FOV
+            {
+                Surface.SetCellAppearance(point.X, point.Y, new ColoredGlyph(Color.DarkGray, Color.Black, Tilemap[point.X, point.Y].Glyph));
+            }
+            else // Completely unexplored
+            {
+                Surface.SetCellAppearance(point.X, point.Y, new ColoredGlyph(Color.Black, Color.Black, ' '));
+            }
         }
+
     }
 }
