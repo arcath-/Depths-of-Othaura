@@ -1,38 +1,48 @@
-﻿
-using Depths_of_Othaura.Data.Screens;
+﻿using Depths_of_Othaura.Data.Screens;
 using SadRogue.Primitives;
-
+using System;
 using System.Collections.Generic;
 using System.Linq;
+
+// TODO: Implement non-square room generation (caves).
+// TODO: Implement different level types (dungeon, town, tower).
+// TODO: Implement non-linear tunnels (digging toward the closest point of the destination room, rather than a straight line).
+// TODO: Implement room weighting. So a small % chance for a special room or a set piece.
+// TODO: Implement LevelGenerator class with different subclasses for each level type (e.g., DungeonLevelGenerator, TownLevelGenerator, TowerLevelGenerator).
 
 namespace Depths_of_Othaura.Data.World.WorldGen
 {
     /// <summary>
-    /// Handles the procedural generation of dungeon layouts.
+    /// Provides methods for generating dungeon maps.
     /// </summary>
     internal static class DungeonGenerator
     {
+        // ========================= Constants =========================
+
         /// <summary>
-        /// The maximum number of attempts to generate valid rooms before stopping.
+        /// Sometimes our random position(s) won't work, so we need a few attempts.
         /// </summary>
         private const int MaxAttempts = 100;
 
         /// <summary>
-        /// The chance (in percentage) of placing a door in a valid position.
+        /// Determines the chance for door placement in a room (percentage).
         /// </summary>
         private const int ChanceForDoorPlacement = 60;
 
+        // ========================= Dungeon Generation =========================
+
         /// <summary>
-        /// Generates a dungeon layout by creating rooms and tunnels.
+        /// Generates a dungeon map within the given tilemap.
         /// </summary>
-        /// <param name="tilemap">The tilemap to modify.</param>
+        /// <param name="tilemap">The tilemap to generate the dungeon in.</param>
         /// <param name="maxRooms">The maximum number of rooms to generate.</param>
-        /// <param name="minRoomSize">The minimum size of each room.</param>
-        /// <param name="maxRoomSize">The maximum size of each room.</param>
-        /// <param name="dungeonRooms">An output list containing the generated rooms.</param>
+        /// <param name="minRoomSize">The minimum size of a room.</param>
+        /// <param name="maxRoomSize">The maximum size of a room.</param>
+        /// <param name="dungeonRooms">A list of rectangles representing the generated rooms.</param>
         public static void Generate(Tilemap tilemap, int maxRooms, int minRoomSize, int maxRoomSize, out IReadOnlyList<Rectangle> dungeonRooms)
         {
             tilemap.Reset();
+
             var random = ScreenContainer.Instance.Random;
             var rooms = new List<Rectangle>();
             dungeonRooms = rooms;
@@ -47,7 +57,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                 int width = random.Next(minRoomSize, maxRoomSize);
                 int height = random.Next(minRoomSize, maxRoomSize);
 
-                // Ensure rooms don't touch the edges
+                // Exclude border tiles so we can set walls properly + keep an empty space as the border
                 int x = random.Next(borderSize, tilemap.Width - width - borderSize);
                 int y = random.Next(borderSize, tilemap.Height - height - borderSize);
 
@@ -66,33 +76,21 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             {
                 Rectangle roomA = rooms[i - 1];
                 Rectangle roomB = rooms[i];
+
                 CarveTunnel(tilemap, roomA.Center, roomB.Center);
             }
 
             AddWalls(tilemap);
             AddDoors(tilemap, rooms);
-            InsertStairs(tilemap, rooms);
         }
 
-        /// <summary>
-        /// Places a staircase leading downward in a randomly selected room.
-        /// </summary>
-        /// <param name="tilemap">The tilemap to modify.</param>
-        /// <param name="rooms">The list of generated dungeon rooms.</param>
-        private static void InsertStairs(Tilemap tilemap, List<Rectangle> rooms)
-        {
-            // Select a random starting room, excluding the first room (player spawn)
-            var randomRoom = rooms[ScreenContainer.Instance.Random.Next(1, rooms.Count)];
-
-            // Place a stairs down at the room
-            tilemap[randomRoom.Center.ToIndex(tilemap.Width)].Type = TileType.StairsDown;
-        }
+        // ========================= Room and Tunnel Carving =========================
 
         /// <summary>
-        /// Carves a room into the tilemap by setting its tiles to floor type.
+        /// Carves a room into the tilemap.
         /// </summary>
-        /// <param name="tilemap">The tilemap to modify.</param>
-        /// <param name="room">The room to carve.</param>
+        /// <param name="tilemap">The tilemap to carve the room into.</param>
+        /// <param name="room">The rectangle representing the room.</param>
         private static void CarveRoom(Tilemap tilemap, Rectangle room)
         {
             for (int x = room.X; x < room.X + room.Width; x++)
@@ -101,14 +99,15 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                 {
                     // Set floor tile
                     tilemap[x, y].Type = TileType.Floor;
+                    tilemap[x, y].Foreground = Color.Black; // Add this line
                 }
             }
         }
 
         /// <summary>
-        /// Creates a tunnel connecting two points by setting tiles to floor type.
+        /// Carves a tunnel between two points in the tilemap.
         /// </summary>
-        /// <param name="tilemap">The tilemap to modify.</param>
+        /// <param name="tilemap">The tilemap to carve the tunnel in.</param>
         /// <param name="start">The starting point of the tunnel.</param>
         /// <param name="end">The ending point of the tunnel.</param>
         private static void CarveTunnel(Tilemap tilemap, Point start, Point end)
@@ -119,6 +118,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             {
                 // Set floor tile
                 tilemap[current.X, current.Y].Type = TileType.Floor;
+                tilemap[current.X, current.Y].Foreground = Color.Black;  //Add This line
                 current = new Point(current.X + (current.X < end.X ? 1 : -1), current.Y);
             }
 
@@ -126,14 +126,17 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             {
                 // Set floor tile
                 tilemap[current.X, current.Y].Type = TileType.Floor;
+                tilemap[current.X, current.Y].Foreground = Color.Black; // Add this line
                 current = new Point(current.X, current.Y + (current.Y < end.Y ? 1 : -1));
             }
         }
 
+        // ========================= Feature Addition =========================
+
         /// <summary>
-        /// Adds walls around all floor tiles in the tilemap.
+        /// Adds walls around the floor tiles in the tilemap.
         /// </summary>
-        /// <param name="tilemap">The tilemap to modify.</param>
+        /// <param name="tilemap">The tilemap to add walls to.</param>
         private static void AddWalls(Tilemap tilemap)
         {
             for (int x = 0; x < tilemap.Width; x++)
@@ -152,6 +155,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                             {
                                 // Set wall glyph and make obstruction fully blocked
                                 tilemap[neighbor.X, neighbor.Y].Type = TileType.Wall;
+                                tilemap[neighbor.X, neighbor.Y].Foreground = Color.Black; // Add this line
                             }
                         }
                     }
@@ -160,10 +164,10 @@ namespace Depths_of_Othaura.Data.World.WorldGen
         }
 
         /// <summary>
-        /// Places doors in valid locations within the dungeon rooms.
+        /// Adds doors to the rooms in the tilemap.
         /// </summary>
-        /// <param name="tilemap">The tilemap to modify.</param>
-        /// <param name="rooms">The list of dungeon rooms.</param>
+        /// <param name="tilemap">The tilemap to add doors to.</param>
+        /// <param name="rooms">The list of rooms to add doors to.</param>
         private static void AddDoors(Tilemap tilemap, List<Rectangle> rooms)
         {
             foreach (var room in rooms)
@@ -191,6 +195,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                             if (ScreenContainer.Instance.Random.Next(100) < ChanceForDoorPlacement)
                             {
                                 tilemap[position.X, position.Y].Type = TileType.Door;
+                                tilemap[position.X, position.Y].Foreground = Color.Black; // Add this line
                             }
                         }
                     }

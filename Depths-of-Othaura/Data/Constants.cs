@@ -1,15 +1,20 @@
-﻿namespace Depths_of_Othaura
-{
+﻿// TODO: 
 
+namespace Depths_of_Othaura
+{
     /// <summary>
     /// Provides easy access to all constant game information.
-    /// </summary
+    /// </summary>
     internal static class Constants
     {
+        // ========================= Game Information =========================
+
         /// <summary>
         /// The title of the game.
         /// </summary>
         public const string GameTitle = "Depths of Othaura";
+
+        // ========================= File Paths =========================
 
         /// <summary>
         /// Path to the primary font used in the game.
@@ -21,10 +26,7 @@
         /// </summary>
         public const string TileConfiguration = "Data/World/Configuration/tiles.json";
 
-        /// <summary>
-        /// Default radius for the player's field of view.
-        /// </summary>
-        public const int PlayerFieldOfViewRadius = 6;
+        // ========================= Game Settings =========================
 
         /// <summary>
         /// Toggle for Ascii/Tiles toggle. Default set to true.
@@ -35,5 +37,12 @@
         /// Toggle for Debug toggle. Default set to false.
         /// </summary>
         public static bool DebugMode = false;
+
+        // ========================= Field of View =========================
+
+        /// <summary>
+        /// Field of View
+        /// </summary>
+        public const int PlayerFieldOfViewRadius = 6;
     }
 }
