@@ -8,6 +8,8 @@ using SadRogue.Primitives;
 using SadRogue.Primitives.GridViews;
 using Color = SadRogue.Primitives.Color;
 
+// TODO: 
+
 namespace Depths_of_Othaura.Data.World
 {
     /// <summary>
@@ -15,6 +17,8 @@ namespace Depths_of_Othaura.Data.World
     /// </summary>
     internal class FOVManager
     {
+        // ========================= Fields =========================
+
         private readonly WorldScreen _world;
         private readonly IFOV _fieldOfView;
         private readonly LambdaGridView<bool> _fovGrid;
@@ -30,6 +34,7 @@ namespace Depths_of_Othaura.Data.World
         // Store the map state before debug mode is enabled
         private (Color foreground, Color background, int glyph)[,] _previousMapState;
 
+        // ========================= Constructor =========================
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FOVManager"/> class.
@@ -48,17 +53,19 @@ namespace Depths_of_Othaura.Data.World
                 (point) => !BlocksFov(point, world));
 
             // Setup FOV map, should not be set inside function, should be set only ONCE.
-            _fieldOfView = new RecursiveShadowcastingFOV(_fovGrid); 
+            _fieldOfView = new RecursiveShadowcastingFOV(_fovGrid);
             _currentFOV = new bool[_width, _height];
 
             //calculate color
-            _baseTileForValues = world.Tilemap[0, 0]; //Cache, it will never change. Well... SHOULDN'T change.
+            _baseTileForValues = world.Tilemap[0, 0]; //Cache, it will never change.
             _unseenColor = CalculateUnseenColor(_baseTileForValues);
 
             //Initialize the map to not visible
             InitilizeNotVisible();
 
         }
+
+        // ========================= Initialization =========================
 
         /// <summary>
         /// Ensures all unexplored tiles are blacked out
@@ -69,12 +76,13 @@ namespace Depths_of_Othaura.Data.World
             {
                 for (int y = 0; y < _height; y++)
                 {
-                    Point point = new Point(x, y);                    
-                    _world.SetTileVisibility(point, false); 
+                    Point point = new Point(x, y);
+                    _world.SetTileVisibility(point, false);
                 }
             }
         }
 
+        // ========================= FOV Calculation =========================
 
         /// <summary>
         /// Calculates the field of view for the specified player.
@@ -85,99 +93,6 @@ namespace Depths_of_Othaura.Data.World
             // This logic was taken from the player class and slightly modified during refactor.
             _fieldOfView.Calculate(player.Position, player.FovRadius);
             ExploreTilemap(player);
-        }
-
-        /// <summary>
-        /// Toggles the visibility of the entire map
-        /// </summary>
-        /// <param name="isEnabled"></param>
-        public void ToggleVisibility(bool isEnabled)
-        {
-            _disableFov = isEnabled;
-
-            // Force a redraw
-            _world.Surface.IsDirty = true; 
-
-            var tilemap = _world.Tilemap;
-            if (isEnabled)
-            {
-                // Save the current map state
-                SaveMapState(tilemap); 
-
-                for (int x = 0; x < _width; x++)
-                {
-                    for (int y = 0; y < _height; y++)
-                    {
-                        Point point = new Point(x, y);
-                        Tile tile = tilemap[x, y];
-
-                        // Set the tile's colors to the base tile colors
-                        // Get a sample config to load color
-                        var baseTile = TilesConfig.Get(tile.Type); 
-
-                        tilemap[x, y].Foreground = baseTile.Foreground;
-                        tilemap[x, y].Background = baseTile.Background;
-
-                        // Set tilemode
-                        tilemap[x, y].Glyph = Constants.AsciiRenderMode ? baseTile.AsciiID : baseTile.TileID;
-
-                        // Directly manipulate the surface
-                        _world.Surface.SetCellAppearance(point.X, point.Y, tile);
-                    }
-                }
-            }
-            else
-            {
-                RestoreMapState(tilemap);
-            }
-            // Force a redraw
-            _world.Surface.IsDirty = true; 
-        }
-
-        /// <summary>
-        /// Saves the FOV map state so the debug state doesnt affect the play state.
-        /// </summary>
-        private void SaveMapState(Tilemap tilemap)
-        {
-            _previousMapState = new (Color foreground, Color background, int glyph)[_width, _height];
-            for (int x = 0; x < _width; x++)
-            {
-                for (int y = 0; y < _height; y++)
-                {
-                    _previousMapState[x, y] = (tilemap[x, y].Foreground, tilemap[x, y].Background, tilemap[x, y].Glyph);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Restore the FOV map play state after exiting a debug state.
-        /// </summary>
-        private void RestoreMapState(Tilemap tilemap)
-        {
-            // Nothing to restore
-            if (_previousMapState == null) return; 
-
-            for (int x = 0; x < _width; x++)
-            {
-                for (int y = 0; y < _height; y++)
-                {
-                    Point point = new Point(x, y);
-                    tilemap[x, y].Foreground = _previousMapState[x, y].foreground;
-                    tilemap[x, y].Background = _previousMapState[x, y].background;
-                    tilemap[x, y].Glyph = _previousMapState[x, y].glyph;
-                    var baseTile = TilesConfig.Get(tilemap[x, y].Type);
-
-                    tilemap[x, y].Glyph = Constants.AsciiRenderMode ? baseTile.AsciiID : baseTile.TileID;
-
-                    // Restore the glyph based on current render mode (ASCII or Tile)
-                    // Set visibility to true so the tile is rendered
-                    _world.Surface.SetCellAppearance(point.X, point.Y, tilemap[x, y]);
-                }
-            }
-            // Clear the saved state, recalculate FOV, and force a redraw.
-            _previousMapState = null; 
-            CalculateFOV(_world.Player);
-            _world.Surface.IsDirty = true;
         }
 
         /// <summary>
@@ -214,7 +129,12 @@ namespace Depths_of_Othaura.Data.World
             }
         }
 
-        
+        /// <summary>
+        /// Applies the FOV to a single tile, setting visibility, color, and glyph.
+        /// </summary>
+        /// <param name="point">The coordinates of the tile to apply the FOV to.</param>
+        /// <param name="tilemap">The tilemap containing the tile.</param>
+        /// <param name="inFov">A value indicating whether the tile is within the FOV.</param>
         private void ApplyFov(SadRogue.Primitives.Point point, Tilemap tilemap, bool inFov)
         {
             //Update visibility even if colors are not changed.
@@ -247,13 +167,110 @@ namespace Depths_of_Othaura.Data.World
                 }
                 else
                 {
-                    // set the unseen values to remain black.                    
+                    // set the unseen values to remain black.
                     tilemap[point.X, point.Y].Foreground = Color.Black;
                     tilemap[point.X, point.Y].Background = Color.Transparent;
                     _world.Surface.SetCellAppearance(point.X, point.Y, tilemap[point.X, point.Y]);
                 }
             }
         }
+
+        // ========================= Debug Mode =========================
+
+        /// <summary>
+        /// Toggles the visibility of the entire map, enabling or disabling FOV.
+        /// </summary>
+        /// <param name="isEnabled">A value indicating whether to enable (true) or disable (false) FOV.</param>
+        public void ToggleVisibility(bool isEnabled)
+        {
+            _disableFov = isEnabled;
+
+            // Force a redraw
+            _world.Surface.IsDirty = true;
+
+            var tilemap = _world.Tilemap;
+            if (isEnabled)
+            {
+                // Save the current map state
+                SaveMapState(tilemap);
+
+                for (int x = 0; x < _width; x++)
+                {
+                    for (int y = 0; y < _height; y++)
+                    {
+                        Point point = new Point(x, y);
+                        Tile tile = tilemap[x, y];
+
+                        // Set the tile's colors to the base tile colors
+                        // Get a sample config to load color
+                        var baseTile = TilesConfig.Get(tile.Type);
+
+                        tilemap[x, y].Foreground = baseTile.Foreground;
+                        tilemap[x, y].Background = baseTile.Background;
+
+                        // Set tilemode
+                        tilemap[x, y].Glyph = Constants.AsciiRenderMode ? baseTile.AsciiID : baseTile.TileID;
+
+                        // Directly manipulate the surface
+                        _world.Surface.SetCellAppearance(point.X, point.Y, tile);
+                    }
+                }
+            }
+            else
+            {
+                RestoreMapState(tilemap);
+            }
+            // Force a redraw
+            _world.Surface.IsDirty = true;
+        }
+
+        /// <summary>
+        /// Saves the FOV map state so the debug state doesnt affect the play state.
+        /// </summary>
+        private void SaveMapState(Tilemap tilemap)
+        {
+            _previousMapState = new (Color foreground, Color background, int glyph)[_width, _height];
+            for (int x = 0; x < _width; x++)
+            {
+                for (int y = 0; y < _height; y++)
+                {
+                    _previousMapState[x, y] = (tilemap[x, y].Foreground, tilemap[x, y].Background, tilemap[x, y].Glyph);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Restore the FOV map play state after exiting a debug state.
+        /// </summary>
+        private void RestoreMapState(Tilemap tilemap)
+        {
+            // Nothing to restore
+            if (_previousMapState == null) return;
+
+            for (int x = 0; x < _width; x++)
+            {
+                for (int y = 0; y < _height; y++)
+                {
+                    Point point = new Point(x, y);
+                    tilemap[x, y].Foreground = _previousMapState[x, y].foreground;
+                    tilemap[x, y].Background = _previousMapState[x, y].background;
+                    tilemap[x, y].Glyph = _previousMapState[x, y].glyph;
+                    var baseTile = TilesConfig.Get(tilemap[x, y].Type);
+
+                    tilemap[x, y].Glyph = Constants.AsciiRenderMode ? baseTile.AsciiID : baseTile.TileID;
+
+                    // Restore the glyph based on current render mode (ASCII or Tile)
+                    // Set visibility to true so the tile is rendered
+                    _world.Surface.SetCellAppearance(point.X, point.Y, tilemap[x, y]);
+                }
+            }
+            // Clear the saved state, recalculate FOV, and force a redraw.
+            _previousMapState = null;
+            CalculateFOV(_world.Player);
+            _world.Surface.IsDirty = true;
+        }
+
+        // ========================= Utility Functions =========================
 
         /// <summary>
         /// Calculates the unseen color based on base value with Lerp
@@ -268,12 +285,22 @@ namespace Depths_of_Othaura.Data.World
             return Color.Lerp(baseColor, Color.Black, 0.5f);
         }
 
-        
+        /// <summary>
+        /// Checks if a given point blocks field of view.
+        /// </summary>
+        /// <param name="point">The point to check.</param>
+        /// <param name="world">The world screen.</param>
+        /// <returns>True if the point blocks FOV; otherwise, false.</returns>
         private bool BlocksFov(SadRogue.Primitives.Point point, WorldScreen world)
         {
             return BlocksFov(world.Tilemap[point.X, point.Y].Obstruction);
         }
 
+        /// <summary>
+        /// Checks if a given obstruction type blocks field of view.
+        /// </summary>
+        /// <param name="obstructionType">The obstruction type to check.</param>
+        /// <returns>True if the obstruction type blocks FOV; otherwise, false.</returns>
         private static bool BlocksFov(ObstructionType obstructionType)
         {
             return obstructionType switch

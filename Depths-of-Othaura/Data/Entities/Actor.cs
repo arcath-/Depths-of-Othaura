@@ -1,10 +1,9 @@
 ﻿using Depths_of_Othaura.Data.Screens;
 using Depths_of_Othaura.Data.World;
-using Depths_of_Othaura.Input;
 using SadConsole.Entities;
-using SadConsole.Input;
 using SadRogue.Primitives;
-using Color = SadRogue.Primitives.Color;
+
+// TODO: 
 
 namespace Depths_of_Othaura.Data.Entities
 {
@@ -13,19 +12,7 @@ namespace Depths_of_Othaura.Data.Entities
     /// </summary>
     internal abstract class Actor : Entity
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Actor"/> class.
-        /// </summary>
-        /// <param name="foreground">The foreground color of the actor.</param>
-        /// <param name="background">The background color of the actor.</param>
-        /// <param name="glyph">The glyph representing the actor.</param>
-        /// <param name="zIndex">The Z index of the actor.</param>
-        /// <param name="maxHealth">The maximum health of the actor.</param>
-        protected Actor(Color foreground, Color background, int glyph, int zIndex, int maxHealth) : base(foreground, background, glyph, zIndex)
-        {
-            MaxHealth = maxHealth;
-            Health = MaxHealth;
-        }
+        // ========================= Properties =========================
 
         /// <summary>
         /// Gets or sets the maximum health of the actor.
@@ -42,6 +29,24 @@ namespace Depths_of_Othaura.Data.Entities
         /// </summary>
         public bool IsAlive => Health > 0;
 
+        // ========================= Constructor =========================
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Actor"/> class.
+        /// </summary>
+        /// <param name="foreground">The foreground color of the actor.</param>
+        /// <param name="background">The background color of the actor.</param>
+        /// <param name="glyph">The glyph representing the actor.</param>
+        /// <param name="zIndex">The Z index of the actor.</param>
+        /// <param name="maxHealth">The maximum health of the actor.</param>
+        protected Actor(Color foreground, Color background, int glyph, int zIndex, int maxHealth) : base(foreground, background, glyph, zIndex)
+        {
+            MaxHealth = maxHealth;
+            Health = MaxHealth;
+        }
+
+        // ========================= Movement =========================
+
         /// <summary>
         /// Attempts to move the actor to the specified coordinates.
         /// </summary>
@@ -50,8 +55,8 @@ namespace Depths_of_Othaura.Data.Entities
         /// <returns><c>true</c> if the actor was moved; otherwise, <c>false</c>.</returns>
         public bool Move(int x, int y)
         {
-            var tilemap = Depths_of_Othaura.Data.Screens.ScreenContainer.Instance.World.Tilemap;
-            var actorManager = Depths_of_Othaura.Data.Screens.ScreenContainer.Instance.World.ActorManager;
+            var tilemap = ScreenContainer.Instance.World.Tilemap;
+            var actorManager = ScreenContainer.Instance.World.ActorManager;
 
             if (!IsAlive) return false;
 

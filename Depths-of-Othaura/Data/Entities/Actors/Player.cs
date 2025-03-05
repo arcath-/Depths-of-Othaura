@@ -3,7 +3,10 @@ using Depths_of_Othaura.Data.World;
 using Depths_of_Othaura.Input;
 using SadConsole.Input;
 using SadRogue.Primitives;
+using System;
 using Color = SadRogue.Primitives.Color;
+
+// TODO: 
 
 namespace Depths_of_Othaura.Data.Entities.Actors
 {
@@ -12,8 +15,28 @@ namespace Depths_of_Othaura.Data.Entities.Actors
     /// </summary>
     internal class Player : Actor
     {
-        private readonly InputHandler _inputHandler = new();
-        private readonly Tilemap _tilemap; // Add this
+        // ========================= Fields =========================
+
+        private readonly InputHandler _inputHandler = new InputHandler();
+        private readonly Tilemap _tilemap;
+
+        // ========================= Properties =========================
+
+        private int _fovRadius = Constants.PlayerFieldOfViewRadius;
+
+        /// <summary>
+        /// Gets or sets the field-of-view radius for the player.
+        /// </summary>
+        public int FovRadius
+        {
+            get => _fovRadius;
+            set
+            {
+                _fovRadius = value;
+            }
+        }
+
+        // ========================= Constructor =========================
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Player"/> class.
@@ -31,6 +54,8 @@ namespace Depths_of_Othaura.Data.Entities.Actors
                 throw new Exception($"Unable to move player to spawn position: {position}");
         }
 
+        // ========================= Input Handling =========================
+
         /// <summary>
         /// Processes keyboard input for player actions, such as movement and toggling render/debug modes.
         /// </summary>
@@ -41,40 +66,28 @@ namespace Depths_of_Othaura.Data.Entities.Actors
             return _inputHandler.ProcessKeyboard(keyboard, this) || base.ProcessKeyboard(keyboard);
         }
 
-        private int _fovRadius = Constants.PlayerFieldOfViewRadius;
-        /// <summary>
-        /// Gets or sets the field-of-view radius for the player.
-        /// </summary>
-        public int FovRadius
-        {
-            get => _fovRadius;
-            set
-            {
-                _fovRadius = value;
-            }
-        }
+        // ========================= Movement =========================
 
         /// <summary>
-        /// Handles the player's position changing.
+        /// Attempts to move the actor in the specified direction.
         /// </summary>
-        /// <param name="sender">The object that raised the event.</param>
-        /// <param name="e">The event arguments containing the old and new positions.</param>
-        private void Player_PositionChanged(object sender, ValueChangedEventArgs<Point> e)
-        {
-            var world = ScreenContainer.Instance.World;
-            // Calculate the field of view for the player's position
-            world.FovManager.CalculateFOV(this);
-        }
-
+        /// <param name="direction">The direction to move in.</param>
+        /// <returns><c>true</c> if the actor was moved; otherwise, <c>false</c>.</returns>
         public bool Move(Direction direction)
         {
             var position = Position + direction;
             return Move(position.X, position.Y);
         }
 
+        /// <summary>
+        /// Attempts to move the actor to the specified coordinates.
+        /// </summary>
+        /// <param name="x">The X coordinate to move to.</param>
+        /// <param name="y">The Y coordinate to move to.</param>
+        /// <returns><c>true</c> if the actor was moved; otherwise, <c>false</c>.</returns>
         public bool Move(int x, int y)
         {
-            var actorManager = Depths_of_Othaura.Data.Screens.ScreenContainer.Instance.World.ActorManager;
+            var actorManager = ScreenContainer.Instance.World.ActorManager;
 
             if (!IsAlive) return false;
 
@@ -96,6 +109,20 @@ namespace Depths_of_Othaura.Data.Entities.Actors
             // Set new position
             Position = new SadRogue.Primitives.Point(x, y);
             return true;
+        }
+
+        // ========================= Event Handling =========================
+
+        /// <summary>
+        /// Handles the player's position changing.
+        /// </summary>
+        /// <param name="sender">The object that raised the event.</param>
+        /// <param name="e">The event arguments containing the old and new positions.</param>
+        private void Player_PositionChanged(object sender, ValueChangedEventArgs<Point> e)
+        {
+            var world = ScreenContainer.Instance.World;
+            // Calculate the field of view for the player's position
+            world.FovManager.CalculateFOV(this);
         }
     }
 }

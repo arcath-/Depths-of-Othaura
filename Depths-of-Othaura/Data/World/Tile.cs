@@ -1,6 +1,8 @@
 ﻿using Depths_of_Othaura.Data.World.Configuration;
 using SadConsole;
 
+// TODO: 
+
 namespace Depths_of_Othaura.Data.World
 {
     /// <summary>
@@ -8,6 +10,8 @@ namespace Depths_of_Othaura.Data.World
     /// </summary>
     internal class Tile : ColoredGlyph
     {
+        // ========================= Properties =========================
+
         /// <summary>
         /// Gets the X coordinate of the tile.
         /// </summary>
@@ -34,19 +38,14 @@ namespace Depths_of_Othaura.Data.World
         public int TileID { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Tile"/> class.
+        /// Gets if it HasBeenLit
         /// </summary>
-        /// <param name="x">The X coordinate of the tile.</param>
-        /// <param name="y">The Y coordinate of the tile.</param>
-        public Tile(int x, int y)
-        {
-            X = x;
-            Y = y;
-            Foreground = Color.Black;
-            Background = Color.Black; // Start fully blacked out
-            CopyFromConfiguration();
-        }
+        public bool HasBeenLit { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the tile is visible.
+        /// </summary>
+        public new bool IsVisible { get; set; }
 
         private TileType _tileType;
         /// <summary>
@@ -66,6 +65,22 @@ namespace Depths_of_Othaura.Data.World
             }
         }
 
+        // ========================= Constructors =========================
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tile"/> class.
+        /// </summary>
+        /// <param name="x">The X coordinate of the tile.</param>
+        /// <param name="y">The Y coordinate of the tile.</param>
+        public Tile(int x, int y)
+        {
+            X = x;
+            Y = y;
+            Foreground = Color.Black;
+            Background = Color.Black; // Start fully blacked out
+            CopyFromConfiguration();
+        }
+
         /// <summary>
         /// Initializes a tile based on its type.
         /// This constructor is primarily used for tile configuration.
@@ -75,6 +90,8 @@ namespace Depths_of_Othaura.Data.World
         {
             _tileType = type;
         }
+
+        // ========================= Configuration =========================
 
         /// <summary>
         /// Copies the tile configuration settings from the configuration data.
@@ -108,15 +125,5 @@ namespace Depths_of_Othaura.Data.World
         {
             Glyph = (char)(Constants.AsciiRenderMode ? AsciiID : TileID);
         }
-
-        /// <summary>
-        /// Gets if it HasBeenLit
-        /// </summary>
-        public bool HasBeenLit { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the tile is visible.
-        /// </summary>
-        public new bool IsVisible { get; set; }
     }
 }

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SadRogue.Primitives;
+﻿using SadRogue.Primitives;
+
+// TODO: 
 
 namespace Depths_of_Othaura.Data.World
 {
@@ -12,6 +9,8 @@ namespace Depths_of_Othaura.Data.World
     /// </summary>
     internal class Tilemap
     {
+        // ========================= Fields =========================
+
         /// <summary>
         /// Gets the width of the tilemap.
         /// </summary>
@@ -37,6 +36,8 @@ namespace Depths_of_Othaura.Data.World
         /// </summary>
         public readonly Tile[] Tiles;
 
+        // ========================= Constructor =========================
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Tilemap"/> class.
         /// </summary>
@@ -60,6 +61,8 @@ namespace Depths_of_Othaura.Data.World
                 }
             }
         }
+
+        // ========================= Tile Access =========================
 
         /// <summary>
         /// Gets the tile at the specified coordinates.
@@ -96,6 +99,8 @@ namespace Depths_of_Othaura.Data.World
             }
         }
 
+        // ========================= Bounds Checking =========================
+
         /// <summary>
         /// Checks if the given coordinates are within the bounds of the tilemap.
         /// </summary>
@@ -106,6 +111,8 @@ namespace Depths_of_Othaura.Data.World
         {
             return x >= 0 && y >= 0 && x < Width && y < Height;
         }
+
+        // ========================= Tilemap Manipulation =========================
 
         /// <summary>
         /// Resets the tilemap by clearing each tile and setting its obstruction type to <see cref="ObstructionType.FullyBlocked"/>.
@@ -138,18 +145,10 @@ namespace Depths_of_Othaura.Data.World
                     // Ensure we reference the correct tile object
                     var tile = Tiles[index];
 
-                    // Debug log to check previous glyph
-                    //System.Console.WriteLine($"Tile[{x}, {y}] before update: {tile.Glyph}");
-
                     // Update glyph dynamically based on the current mode
                     tile.UpdateGlyph();
-                    
-                    // Debug log to verify update
-                    //System.Console.WriteLine($"Tile[{x}, {y}] after update: {tile.Glyph}");
                 }
             }
-
-            //System.Console.WriteLine("Tile glyphs updated.");
         }
     }
 }

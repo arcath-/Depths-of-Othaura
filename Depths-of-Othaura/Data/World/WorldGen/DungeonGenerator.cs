@@ -3,8 +3,6 @@ using SadRogue.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 // TODO: Implement non-square room generation (caves).
 // TODO: Implement different level types (dungeon, town, tower).
@@ -19,10 +17,19 @@ namespace Depths_of_Othaura.Data.World.WorldGen
     /// </summary>
     internal static class DungeonGenerator
     {
-        // Sometimes our random position(s) won't work, so we need a few attempts
+        // ========================= Constants =========================
+
+        /// <summary>
+        /// Sometimes our random position(s) won't work, so we need a few attempts.
+        /// </summary>
         private const int MaxAttempts = 100;
-        // Do you want doors in every room or only a smaller percentage, 60% seems nice
+
+        /// <summary>
+        /// Determines the chance for door placement in a room (percentage).
+        /// </summary>
         private const int ChanceForDoorPlacement = 60;
+
+        // ========================= Dungeon Generation =========================
 
         /// <summary>
         /// Generates a dungeon map within the given tilemap.
@@ -31,7 +38,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
         /// <param name="maxRooms">The maximum number of rooms to generate.</param>
         /// <param name="minRoomSize">The minimum size of a room.</param>
         /// <param name="maxRoomSize">The maximum size of a room.</param>
-        /// <param name="rooms">A list of rectangles representing the generated rooms.</param>
+        /// <param name="dungeonRooms">A list of rectangles representing the generated rooms.</param>
         public static void Generate(Tilemap tilemap, int maxRooms, int minRoomSize, int maxRoomSize, out IReadOnlyList<Rectangle> dungeonRooms)
         {
             tilemap.Reset();
@@ -64,7 +71,6 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                 }
             }
 
-
             // Connect rooms with tunnels
             for (int i = 1; i < rooms.Count; i++)
             {
@@ -77,6 +83,8 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             AddWalls(tilemap);
             AddDoors(tilemap, rooms);
         }
+
+        // ========================= Room and Tunnel Carving =========================
 
         /// <summary>
         /// Carves a room into the tilemap.
@@ -122,6 +130,8 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                 current = new Point(current.X, current.Y + (current.Y < end.Y ? 1 : -1));
             }
         }
+
+        // ========================= Feature Addition =========================
 
         /// <summary>
         /// Adds walls around the floor tiles in the tilemap.
@@ -192,7 +202,5 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                 }
             }
         }
-
-
     }
 }

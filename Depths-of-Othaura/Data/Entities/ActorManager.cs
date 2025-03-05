@@ -1,4 +1,9 @@
 ﻿using SadConsole.Entities;
+using SadRogue.Primitives;
+using System;
+using System.Collections.Generic;
+
+// TODO: 
 
 namespace Depths_of_Othaura.Data.Entities
 {
@@ -7,26 +12,32 @@ namespace Depths_of_Othaura.Data.Entities
     /// </summary>
     internal sealed class ActorManager
     {
+        // ========================= Fields =========================
+
         /// <summary>
         /// Dictionary storing actors by their position.
         /// </summary>
-        private readonly Dictionary<Point, Actor> _actors = [];
+        private readonly Dictionary<Point, Actor> _actors = new Dictionary<Point, Actor>();
 
         /// <summary>
         /// Manages the actors' visual representation on the screen.
         /// </summary>
         public readonly EntityManager EntityComponent;
 
+        // ========================= Constructor =========================
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ActorManager"/> class.
         /// </summary>
         public ActorManager()
         {
-            EntityComponent = new()
+            EntityComponent = new EntityManager()
             {
                 SkipExistsChecks = true
             };
         }
+
+        // ========================= Actor Management =========================
 
         /// <summary>
         /// Adds an actor to the manager.
@@ -61,6 +72,19 @@ namespace Depths_of_Othaura.Data.Entities
         }
 
         /// <summary>
+        /// Clears all actors from the manager.
+        /// </summary>
+        public void Clear()
+        {
+            foreach (var actor in _actors.Values)
+            {
+                _ = Remove(actor);
+            }
+        }
+
+        // ========================= Actor Retrieval =========================
+
+        /// <summary>
         /// Gets the actor at the specified point.
         /// </summary>
         /// <param name="point">The point to get the actor at.</param>
@@ -82,16 +106,7 @@ namespace Depths_of_Othaura.Data.Entities
             return _actors.ContainsKey(point);
         }
 
-        /// <summary>
-        /// Clears all actors from the manager.
-        /// </summary>
-        public void Clear()
-        {
-            foreach (var actor in _actors.Values)
-            {
-                _ = Remove(actor);
-            }
-        }
+        // ========================= Event Handling =========================
 
         /// <summary>
         /// Updates the actor's position within the manager when its position changes.

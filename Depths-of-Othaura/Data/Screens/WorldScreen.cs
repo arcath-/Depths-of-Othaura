@@ -3,12 +3,10 @@ using Depths_of_Othaura.Data.Entities.Actors;
 using Depths_of_Othaura.Data.World;
 using Depths_of_Othaura.Data.World.WorldGen;
 using SadConsole;
+using SadRogue.Primitives;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Console = System.Console;
+
+// TODO: 
 
 namespace Depths_of_Othaura.Data.Screens
 {
@@ -17,6 +15,8 @@ namespace Depths_of_Othaura.Data.Screens
     /// </summary>
     internal class WorldScreen : ScreenSurface
     {
+        // ========================= Properties =========================
+
         /// <summary>
         /// Gets the tilemap associated with this screen.
         /// </summary>
@@ -33,6 +33,13 @@ namespace Depths_of_Othaura.Data.Screens
         public Player Player { get; private set; }
 
         /// <summary>
+        /// Exposes the field of view manager.
+        /// </summary>
+        public FOVManager FovManager => _fovManager;
+
+        // ========================= Fields =========================
+
+        /// <summary>
         /// The list of dungeon rooms generated during world generation.
         /// </summary>
         private IReadOnlyList<Rectangle> _dungeonRooms;
@@ -42,10 +49,7 @@ namespace Depths_of_Othaura.Data.Screens
         /// </summary>
         private readonly FOVManager _fovManager;
 
-        /// <summary>
-        /// Exposes the field of view manager.
-        /// </summary>
-        public FOVManager FovManager => _fovManager;
+        // ========================= Constructor =========================
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WorldScreen"/> class.
@@ -77,15 +81,13 @@ namespace Depths_of_Othaura.Data.Screens
             }
         }
 
+        // ========================= World Generation =========================
 
         /// <summary>
         /// Generates the initial world content.
         /// </summary>
         public void Generate()
         {
-            // TODO: Implement character creation screen before generating the world.
-            // TODO: Use RaceManager and ClassManager to populate race/class options.
-
             DungeonGenerator.Generate(Tilemap, 10, 4, 10, out _dungeonRooms);
             if (_dungeonRooms.Count == 0)
                 throw new Exception("Faulty dungeon generation, no rooms!");
@@ -101,6 +103,8 @@ namespace Depths_of_Othaura.Data.Screens
             _fovManager.CalculateFOV(Player);
         }
 
+        // ========================= Rendering =========================
+
         /// <summary>
         /// Toggles between ASCII mode and Tile mode and updates the map accordingly
         /// </summary>
@@ -108,7 +112,6 @@ namespace Depths_of_Othaura.Data.Screens
         {
             // Change rendering modes.
             Constants.AsciiRenderMode = !Constants.AsciiRenderMode;
-            //MessagesScreen.WriteLine($"Tile mode toggled: {(Constants.AsciiRenderMode ? "ASCII Mode" : "Tile Mode")}");
             System.Console.WriteLine($"Tile mode toggled: {(Constants.AsciiRenderMode ? "ASCII Mode" : "Tile Mode")}");
 
             Tilemap.UpdateGlyph();
@@ -118,7 +121,7 @@ namespace Depths_of_Othaura.Data.Screens
         }
 
         /// <summary>
-        /// Toggles Debug mode
+        /// Toggles the visibility of the entire map
         /// </summary>
         public void ToggleDebugMode()
         {
@@ -126,16 +129,13 @@ namespace Depths_of_Othaura.Data.Screens
             System.Console.WriteLine($"Debug mode toggled: {(Constants.DebugMode ? "On" : "Off")}");
 
             _fovManager.ToggleVisibility(Constants.DebugMode);
-
-            // TODO: Add a red outline around the screen to show you are in debug.
         }
 
         /// <summary>
-        /// Toggles the visibility of the entire map
+        /// Sets the visibility of a tile on the surface.
         /// </summary>
-        /// <param name="point"></param>
-        /// <param name="isVisible"></param>
-        // In WorldScreen.SetTileVisibility
+        /// <param name="point">The coordinates of the tile.</param>
+        /// <param name="isVisible">A value indicating whether the tile is visible.</param>
         public void SetTileVisibility(Point point, bool isVisible)
         {
             Tile tile = Tilemap[point.X, point.Y];
@@ -155,7 +155,5 @@ namespace Depths_of_Othaura.Data.Screens
                 Surface.SetCellAppearance(point.X, point.Y, new ColoredGlyph(Color.Black, Color.Black, ' '));
             }
         }
-
-
     }
 }

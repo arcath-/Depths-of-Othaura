@@ -1,7 +1,9 @@
 ﻿using Depths_of_Othaura.Data.Entities.Actors;
 using Depths_of_Othaura.Data.Screens;
 using SadConsole.Input;
+using SadRogue.Primitives;
 
+// TODO: 
 
 namespace Depths_of_Othaura.Input
 {
@@ -10,6 +12,8 @@ namespace Depths_of_Othaura.Input
     /// </summary>
     internal class InputHandler
     {
+        // ========================= Input Processing =========================
+
         /// <summary>
         /// Processes keyboard input and updates the player's state accordingly.
         /// </summary>
@@ -25,6 +29,8 @@ namespace Depths_of_Othaura.Input
 
             return moved;
         }
+
+        // ========================= Movement Handling =========================
 
         /// <summary>
         /// Handles player movement based on keyboard input.
@@ -55,6 +61,8 @@ namespace Depths_of_Othaura.Input
             if (keyboard.IsKeyPressed(Keys.D)) return Direction.Right;
             return null;
         }
+
+        // ========================= Toggle Handling =========================
 
         /// <summary>
         /// Handles toggling render and debug modes based on keyboard input.

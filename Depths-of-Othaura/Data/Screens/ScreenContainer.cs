@@ -1,10 +1,8 @@
 ﻿using SadConsole;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SadRogue.Primitives;
+using System;
+
+// TODO: 
 
 namespace Depths_of_Othaura.Data.Screens
 {
@@ -13,6 +11,17 @@ namespace Depths_of_Othaura.Data.Screens
     /// </summary>
     internal class ScreenContainer : ScreenObject
     {
+        // ========================= Static Fields =========================
+
+        private static ScreenContainer _instance;
+
+        /// <summary>
+        /// Gets the singleton instance of the <see cref="ScreenContainer"/> class.
+        /// </summary>
+        public static ScreenContainer Instance => _instance ?? throw new Exception("ScreenContainer is not yet initialized.");
+
+        // ========================= Properties =========================
+
         /// <summary>
         /// Gets the world screen.
         /// </summary>
@@ -28,14 +37,12 @@ namespace Depths_of_Othaura.Data.Screens
         /// </summary>
         public ScreenSurface Messages { get; }
 
+        /// <summary>
+        /// Provides a random number generator for the game.
+        /// </summary>
         public Random Random { get; }
 
-        private static ScreenContainer _instance;
-
-        /// <summary>
-        /// Gets the singleton instance of the <see cref="ScreenContainer"/> class.
-        /// </summary>
-        public static ScreenContainer Instance => _instance ?? throw new Exception("ScreenContainer is not yet initialized.");
+        // ========================= Constructor =========================
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScreenContainer"/> class.
