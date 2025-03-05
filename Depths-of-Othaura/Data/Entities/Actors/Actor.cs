@@ -1,11 +1,12 @@
-﻿using Depths_of_Othaura.Data.Screens;
+﻿using Depths_of_Othaura.Data.Entities.Actors;
+using Depths_of_Othaura.Data.Screens;
 using Depths_of_Othaura.Data.World;
 using SadConsole.Entities;
 using SadRogue.Primitives;
 
 // TODO: 
 
-namespace Depths_of_Othaura.Data.Entities
+namespace Depths_of_Othaura.Data.Entities.Actors
 {
     /// <summary>
     /// Base class for all actors in the game.
@@ -70,13 +71,13 @@ namespace Depths_of_Othaura.Data.Entities
             var obstruction = tilemap[x, y].Obstruction;
             switch (obstruction)
             {
-                case World.ObstructionType.FullyBlocked:
-                case World.ObstructionType.MovementBlocked:
+                case ObstructionType.FullyBlocked:
+                case ObstructionType.MovementBlocked:
                     return false;
             }
 
             // Set new position
-            Position = new SadRogue.Primitives.Point(x, y);
+            Position = new Point(x, y);
             return true;
         }
 

@@ -6,7 +6,7 @@ using SadRogue.Primitives;
 using System;
 using Color = SadRogue.Primitives.Color;
 
-// TODO: 
+// TODO: Implement a race and class system with managers.
 
 namespace Depths_of_Othaura.Data.Entities.Actors
 {
