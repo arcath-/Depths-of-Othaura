@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Console = System.Console;
 
 namespace Depths_of_Othaura.Data.Screens
 {
@@ -66,10 +67,12 @@ namespace Depths_of_Othaura.Data.Screens
             {
                 for (int y = 0; y < height; y++)
                 {
+                    Point point = new Point(x, y);
                     Tile tile = Tilemap[x, y];
                     tile.IsVisible = false;
                     tile.HasBeenLit = false;  // Never seen before
                     tile.Foreground = Color.Black; // Initial color for unseen
+                    SetTileVisibility(point, false); // Apply initial blacking out to the surface
                 }
             }
         }
@@ -134,6 +137,8 @@ namespace Depths_of_Othaura.Data.Screens
         /// <param name="isVisible"></param>
         public void SetTileVisibility(Point point, bool isVisible)
         {
+            //Console.WriteLine($"SetTileVisibility called for ({point.X}, {point.Y}) - Visible: {isVisible}");
+
             if (isVisible)
             {
                 Surface.SetCellAppearance(point.X, point.Y, Tilemap[point.X, point.Y]);
@@ -147,6 +152,7 @@ namespace Depths_of_Othaura.Data.Screens
                 Surface.SetCellAppearance(point.X, point.Y, new ColoredGlyph(Color.Black, Color.Black, ' '));
             }
         }
+
 
     }
 }

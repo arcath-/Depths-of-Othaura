@@ -91,6 +91,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                 {
                     // Set floor tile
                     tilemap[x, y].Type = TileType.Floor;
+                    tilemap[x, y].Foreground = Color.Black; // Add this line
                 }
             }
         }
@@ -109,6 +110,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             {
                 // Set floor tile
                 tilemap[current.X, current.Y].Type = TileType.Floor;
+                tilemap[current.X, current.Y].Foreground = Color.Black;  //Add This line
                 current = new Point(current.X + (current.X < end.X ? 1 : -1), current.Y);
             }
 
@@ -116,6 +118,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
             {
                 // Set floor tile
                 tilemap[current.X, current.Y].Type = TileType.Floor;
+                tilemap[current.X, current.Y].Foreground = Color.Black; // Add this line
                 current = new Point(current.X, current.Y + (current.Y < end.Y ? 1 : -1));
             }
         }
@@ -142,6 +145,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                             {
                                 // Set wall glyph and make obstruction fully blocked
                                 tilemap[neighbor.X, neighbor.Y].Type = TileType.Wall;
+                                tilemap[neighbor.X, neighbor.Y].Foreground = Color.Black; // Add this line
                             }
                         }
                     }
@@ -181,6 +185,7 @@ namespace Depths_of_Othaura.Data.World.WorldGen
                             if (ScreenContainer.Instance.Random.Next(100) < ChanceForDoorPlacement)
                             {
                                 tilemap[position.X, position.Y].Type = TileType.Door;
+                                tilemap[position.X, position.Y].Foreground = Color.Black; // Add this line
                             }
                         }
                     }
