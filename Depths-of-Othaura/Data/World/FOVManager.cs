@@ -47,11 +47,12 @@ namespace Depths_of_Othaura.Data.World
                 _height,
                 (point) => !BlocksFov(point, world));
 
-            _fieldOfView = new RecursiveShadowcastingFOV(_fovGrid); // Setup FOV map, should not be set inside function, should be set ONCE, so move here.
+            // Setup FOV map, should not be set inside function, should be set only ONCE.
+            _fieldOfView = new RecursiveShadowcastingFOV(_fovGrid); 
             _currentFOV = new bool[_width, _height];
 
             //calculate color
-            _baseTileForValues = world.Tilemap[0, 0]; //Cache, it will never change.
+            _baseTileForValues = world.Tilemap[0, 0]; //Cache, it will never change. Well... SHOULDN'T change.
             _unseenColor = CalculateUnseenColor(_baseTileForValues);
 
             //Initialize the map to not visible
@@ -59,15 +60,17 @@ namespace Depths_of_Othaura.Data.World
 
         }
 
-        //To initialize everything to a default, so all will be black.
+        /// <summary>
+        /// Ensures all unexplored tiles are blacked out
+        /// </summary>
         private void InitilizeNotVisible()
         {
             for (int x = 0; x < _width; x++)
             {
                 for (int y = 0; y < _height; y++)
                 {
-                    Point point = new Point(x, y);
-                    _world.SetTileVisibility(point, false); // Ensures all unexplored tiles are blacked out
+                    Point point = new Point(x, y);                    
+                    _world.SetTileVisibility(point, false); 
                 }
             }
         }
@@ -79,7 +82,7 @@ namespace Depths_of_Othaura.Data.World
         /// <param name="player">The player to calculate the field of view for.</param>
         public void CalculateFOV(Player player)
         {
-            // This logic was taken from the player class and slightly modified
+            // This logic was taken from the player class and slightly modified during refactor.
             _fieldOfView.Calculate(player.Position, player.FovRadius);
             ExploreTilemap(player);
         }
@@ -91,12 +94,15 @@ namespace Depths_of_Othaura.Data.World
         public void ToggleVisibility(bool isEnabled)
         {
             _disableFov = isEnabled;
-            _world.Surface.IsDirty = true; // Force a redraw
+
+            // Force a redraw
+            _world.Surface.IsDirty = true; 
 
             var tilemap = _world.Tilemap;
             if (isEnabled)
             {
-                SaveMapState(tilemap); // Save the current map state
+                // Save the current map state
+                SaveMapState(tilemap); 
 
                 for (int x = 0; x < _width; x++)
                 {
@@ -106,12 +112,13 @@ namespace Depths_of_Othaura.Data.World
                         Tile tile = tilemap[x, y];
 
                         // Set the tile's colors to the base tile colors
-                        var baseTile = TilesConfig.Get(tile.Type); //Get a sample config to load color.
+                        // Get a sample config to load color
+                        var baseTile = TilesConfig.Get(tile.Type); 
 
                         tilemap[x, y].Foreground = baseTile.Foreground;
                         tilemap[x, y].Background = baseTile.Background;
 
-                        //Set tilemode
+                        // Set tilemode
                         tilemap[x, y].Glyph = Constants.AsciiRenderMode ? baseTile.AsciiID : baseTile.TileID;
 
                         // Directly manipulate the surface
@@ -123,9 +130,13 @@ namespace Depths_of_Othaura.Data.World
             {
                 RestoreMapState(tilemap);
             }
-            _world.Surface.IsDirty = true; // Force a redraw
+            // Force a redraw
+            _world.Surface.IsDirty = true; 
         }
 
+        /// <summary>
+        /// Saves the FOV map state so the debug state doesnt affect the play state.
+        /// </summary>
         private void SaveMapState(Tilemap tilemap)
         {
             _previousMapState = new (Color foreground, Color background, int glyph)[_width, _height];
@@ -138,9 +149,13 @@ namespace Depths_of_Othaura.Data.World
             }
         }
 
+        /// <summary>
+        /// Restore the FOV map play state after exiting a debug state.
+        /// </summary>
         private void RestoreMapState(Tilemap tilemap)
         {
-            if (_previousMapState == null) return; // Nothing to restore
+            // Nothing to restore
+            if (_previousMapState == null) return; 
 
             for (int x = 0; x < _width; x++)
             {
@@ -159,9 +174,10 @@ namespace Depths_of_Othaura.Data.World
                     _world.Surface.SetCellAppearance(point.X, point.Y, tilemap[x, y]);
                 }
             }
-            _previousMapState = null; // Clear the saved state
-            CalculateFOV(_world.Player); // Recalculate FOV after debug is disabled
-            _world.Surface.IsDirty = true; // Force a redraw
+            // Clear the saved state, recalculate FOV, and force a redraw.
+            _previousMapState = null; 
+            CalculateFOV(_world.Player);
+            _world.Surface.IsDirty = true;
         }
 
         /// <summary>
@@ -170,15 +186,15 @@ namespace Depths_of_Othaura.Data.World
         /// <param name="player">The player to explore the tilemap for.</param>
         private void ExploreTilemap(Player player)
         {
-            //If you are in debug, do not run the FOV
+            // If you are in debug, do not run the FOV
             if (_disableFov) return;
 
             var tilemap = _world.Tilemap;
 
-            //Recalculate Field of View - necessary because the map is always going to be dirty
+            // Recalculate Field of View - necessary because the map is always going to be dirty
             _fieldOfView.Calculate(player.Position, player.FovRadius);
 
-            // Iterate through the ENTIRE map, and apply FOV, this will be a lot of code.
+            // Iterate through the ENTIRE map, and apply FOV.
             for (int x = 0; x < _width; x++)
             {
                 for (int y = 0; y < _height; y++)
@@ -190,15 +206,15 @@ namespace Depths_of_Othaura.Data.World
                     //Check if there is a change from before.
                     if (_currentFOV[x, y] != inFov)
                     {
-                        //Its a change!
-                        _currentFOV[x, y] = inFov; //Update so there isnt a change next time.
+                        // Its a change and update so there isnt a change next time.
+                        _currentFOV[x, y] = inFov;
                         ApplyFov(point, tilemap, inFov);
                     }
                 }
             }
         }
 
-        //Set colors function
+        
         private void ApplyFov(SadRogue.Primitives.Point point, Tilemap tilemap, bool inFov)
         {
             //Update visibility even if colors are not changed.
@@ -218,7 +234,7 @@ namespace Depths_of_Othaura.Data.World
             }
             else
             {
-                //If we have been in the level before, use those instead.
+                //If we have these tiles before, use those instead.
                 if (tilemap[point.X, point.Y].HasBeenLit)
                 {
                     // Tile has been seen before, so make it dark gray
@@ -231,17 +247,12 @@ namespace Depths_of_Othaura.Data.World
                 }
                 else
                 {
-                    //set the unseen values
-                    // Completely unseen tile remains black
+                    // set the unseen values to remain black.                    
                     tilemap[point.X, point.Y].Foreground = Color.Black;
                     tilemap[point.X, point.Y].Background = Color.Transparent;
                     _world.Surface.SetCellAppearance(point.X, point.Y, tilemap[point.X, point.Y]);
                 }
-
-
             }
-
-
         }
 
         /// <summary>
@@ -257,7 +268,7 @@ namespace Depths_of_Othaura.Data.World
             return Color.Lerp(baseColor, Color.Black, 0.5f);
         }
 
-        //This was a anonymous function, that means garbage allocation. Move outside the function.
+        
         private bool BlocksFov(SadRogue.Primitives.Point point, WorldScreen world)
         {
             return BlocksFov(world.Tilemap[point.X, point.Y].Obstruction);
